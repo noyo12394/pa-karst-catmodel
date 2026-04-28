@@ -22,7 +22,7 @@ The pipeline writes processed CSVs to `data/processed/`, result tables to `outpu
 
 ## Dashboard and Vercel
 
-This repository includes a static dashboard in `dashboard/` for web presentation of the model baseline. Build it locally with:
+This repository includes a static project hub in `dashboard/` for web presentation of the model baseline, literature context, methodology, interactive exposure/KHI views, scenario testing, and project outputs. Build it locally with:
 
 ```bash
 npm run build

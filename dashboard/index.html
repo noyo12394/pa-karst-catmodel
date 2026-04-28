@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
       name="description"
-      content="PA karst hazard CATModel dashboard for essential-facility exposure in southeastern Pennsylvania."
+      content="PA karst hazard CATModel project hub for literature, methods, exposure analysis, KHI sensitivity, and Vercel-ready results."
     >
-    <title>PA Karst CATModel Dashboard</title>
+    <title>PA Karst CATModel Project Hub</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23b85042%22/%3E%3Cpath%20d%3D%22M12%2043%20L25%2018%20L35%2037%20L46%2022%20L56%2043%20Z%22%20fill%3D%22%23e7e8d1%22/%3E%3C/svg%3E"
@@ -16,15 +16,28 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="topbar" aria-label="Dashboard summary">
-        <div>
-          <p class="eyebrow">Lehigh CAT402 / CEE332</p>
+      <section class="topbar" aria-label="Project controls">
+        <div class="title-block">
+          <p class="eyebrow">Lehigh CAT402 / CEE332 final project</p>
           <h1>PA Karst Hazard CATModel</h1>
+          <p class="dek">
+            A project hub for mapped karst susceptibility, essential-facility exposure,
+            KHI sensitivity, literature context, and deployable outputs.
+          </p>
         </div>
-        <div class="toolbar" aria-label="Dashboard controls">
-          <label class="select-wrap">
+
+        <div class="control-stack" aria-label="Global filters">
+          <label class="control">
             <span>County</span>
             <select id="countySelect"></select>
+          </label>
+          <label class="control">
+            <span>Buffer</span>
+            <select id="bufferSelect">
+              <option value="100">100 m</option>
+              <option value="250">250 m</option>
+              <option value="500" selected>500 m</option>
+            </select>
           </label>
           <div class="segmented" role="group" aria-label="KHI weighting scheme">
             <button type="button" class="segment active" data-scheme="Base">Base</button>
@@ -34,21 +47,37 @@
         </div>
       </section>
 
+      <nav class="tabbar" aria-label="Project sections">
+        <button class="tab active" type="button" data-tab="overview">Overview</button>
+        <button class="tab" type="button" data-tab="story">Project Idea</button>
+        <button class="tab" type="button" data-tab="literature">Literature</button>
+        <button class="tab" type="button" data-tab="data">Data & Methods</button>
+        <button class="tab" type="button" data-tab="exposure">Exposure Lab</button>
+        <button class="tab" type="button" data-tab="khi">KHI Lab</button>
+        <button class="tab" type="button" data-tab="scenario">Scenario</button>
+        <button class="tab" type="button" data-tab="outputs">Outputs</button>
+      </nav>
+
       <section class="metric-grid" aria-label="Key model metrics">
         <article class="metric-card">
           <span class="metric-label">Study Counties</span>
           <strong id="metricCounties">5</strong>
-          <span class="metric-note">southeastern Pennsylvania</span>
+          <span class="metric-note">selected geography</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Mapped Karst</span>
           <strong id="metricKarst">41,760</strong>
-          <span class="metric-note">features in model baseline</span>
+          <span class="metric-note">features in baseline</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Facilities</span>
           <strong id="metricFacilities">1,047</strong>
-          <span class="metric-note">synthetic essential points</span>
+          <span class="metric-note">active facility filter</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Within Buffer</span>
+          <strong id="metricExposed">366</strong>
+          <span class="metric-note" id="metricBufferNote">within 500 m</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Population</span>
@@ -57,76 +86,335 @@
         </article>
       </section>
 
-      <section class="dashboard-grid">
-        <article class="panel map-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Spatial screen</p>
-              <h2>Hazard and exposure by county</h2>
-            </div>
-            <span id="selectedBadge" class="status-pill">All counties</span>
-          </div>
-          <div id="mapViz" class="map-viz" role="img" aria-label="County map with karst and exposure points"></div>
-        </article>
+      <section class="workspace">
+        <section class="tab-view active" data-view="overview">
+          <div class="overview-grid">
+            <article class="panel map-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Spatial screen</p>
+                  <h2>Karst susceptibility and exposed essential facilities</h2>
+                </div>
+                <span id="selectedBadge" class="status-pill">All counties</span>
+              </div>
+              <div id="mapViz" class="map-viz" role="img" aria-label="County map with karst and exposure symbols"></div>
+            </article>
 
-        <article class="panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">County comparison</p>
-              <h2>Exposure pressure</h2>
-            </div>
-          </div>
-          <div id="countyBars" class="chart" aria-label="County exposure bar chart"></div>
-        </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">County comparison</p>
+                  <h2>Exposure pressure</h2>
+                </div>
+              </div>
+              <div id="countyBars" class="chart" aria-label="County exposure bar chart"></div>
+            </article>
 
-        <article class="panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Facility portfolio</p>
-              <h2>Critical assets by type</h2>
-            </div>
-          </div>
-          <div id="facilityMix" class="chart" aria-label="Facility mix chart"></div>
-        </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Facility portfolio</p>
+                  <h2>Active essential assets</h2>
+                </div>
+              </div>
+              <div id="facilityMix" class="chart" aria-label="Facility mix chart"></div>
+            </article>
 
-        <article class="panel khi-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Municipality cells</p>
-              <h2>KHI rank sensitivity</h2>
-            </div>
+            <article class="panel thesis-panel">
+              <p class="eyebrow">Core thesis</p>
+              <h2>Karst is not modeled as a single event. It is modeled as a susceptibility surface that changes facility exposure priorities.</h2>
+              <p>
+                The project keeps the geospatial stack intentionally light, then uses buffer
+                exposure, local mapped-feature density, and facility criticality to identify
+                where a more detailed site investigation would matter most.
+              </p>
+              <div class="mini-table" id="countyProfile"></div>
+            </article>
           </div>
-          <div id="khiList" class="khi-list" aria-label="Top KHI cells"></div>
-        </article>
+        </section>
 
-        <article class="panel wide-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Scenario lens</p>
-              <h2>Loss proxy and buffer exposure</h2>
-            </div>
-          </div>
-          <div class="dual-chart">
-            <div id="lossBars" class="chart compact" aria-label="Relative loss proxy chart"></div>
-            <div id="bufferDonut" class="donut-wrap" aria-label="Facility buffer exposure chart"></div>
-          </div>
-        </article>
+        <section class="tab-view" data-view="story">
+          <div class="two-col">
+            <article class="panel">
+              <p class="eyebrow">Full project idea</p>
+              <h2>From geology layer to CATModel screening workflow</h2>
+              <p>
+                The project begins with a practical problem: southeastern Pennsylvania has
+                mapped karst features, but a final-project risk model needs a repeatable
+                way to connect that hazard information to hospitals, schools, police, and
+                fire/EMS facilities. The dashboard treats the DCNR karst inventory as a
+                susceptibility proxy, not a forecast of individual sinkholes.
+              </p>
+              <p>
+                The model then builds a synthetic essential-facility portfolio around
+                county population centers. Each facility receives a nearest-karst distance,
+                a buffer score, a 1 km local density score, and a type-based criticality
+                score. Those facility scores roll up into municipality-like cells for the
+                Karst Hazard Index.
+              </p>
+              <p>
+                The result is a classroom-scale CATModel that is transparent enough to
+                defend in a presentation and structured enough to improve later with real
+                facility points, municipal polygons, fragility curves, and loss functions.
+              </p>
+            </article>
 
-        <article class="panel model-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Model contract</p>
-              <h2>Pipeline outputs</h2>
-            </div>
+            <article class="panel">
+              <p class="eyebrow">Research question</p>
+              <h2>Where do mapped karst susceptibility and essential-facility exposure overlap strongly enough to justify deeper engineering review?</h2>
+              <div class="question-grid">
+                <div>
+                  <strong>Hazard</strong>
+                  <span>Mapped karst feature count and density</span>
+                </div>
+                <div>
+                  <strong>Exposure</strong>
+                  <span>Facility proximity to mapped features</span>
+                </div>
+                <div>
+                  <strong>Criticality</strong>
+                  <span>Facility function and disruption relevance</span>
+                </div>
+                <div>
+                  <strong>Uncertainty</strong>
+                  <span>Rank shifts under alternate KHI weights</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Project history</p>
+              <h2>How the model is built</h2>
+              <div class="timeline">
+                <div><b>1</b><span>Scope five counties with high project relevance and manageable data volume.</span></div>
+                <div><b>2</b><span>Parse the DCNR DBF directly so the workflow avoids GeoPandas installation friction.</span></div>
+                <div><b>3</b><span>Generate fixed-seed facility points around population centers for reproducible classroom analysis.</span></div>
+                <div><b>4</b><span>Score exposure using distance buffers, local mapped-feature density, and facility criticality.</span></div>
+                <div><b>5</b><span>Aggregate into KHI cells and test whether rankings survive changes in model weights.</span></div>
+                <div><b>6</b><span>Package results as tables, figures, a slide deck, GitHub repository, and Vercel dashboard.</span></div>
+              </div>
+            </article>
           </div>
-          <ul class="pipeline-list">
-            <li><span></span>DBF parser writes cleaned karst records</li>
-            <li><span></span>Facility generator fixes seed at 42</li>
-            <li><span></span>Exposure scores combine density, proximity, and criticality</li>
-            <li><span></span>KHI ranks run three sensitivity schemes</li>
-            <li><span></span>Python PPTX builder composes the final deck</li>
-          </ul>
-        </article>
+        </section>
+
+        <section class="tab-view" data-view="literature">
+          <div class="literature-grid">
+            <article class="panel">
+              <p class="eyebrow">Literature matrix</p>
+              <h2>What each source contributes</h2>
+              <div class="citation-table">
+                <div><b>IPCC 2014</b><span>Risk framing as interaction of hazard, exposure, and vulnerability.</span></div>
+                <div><b>USGS natural-hazards work</b><span>Screening-level hazard assessment and vulnerability communication.</span></div>
+                <div><b>Reese & Kochanov, PAGS</b><span>Pennsylvania karst and sinkhole context for engineering geology.</span></div>
+                <div><b>PASDA / DCNR</b><span>Mapped karst inventory used as the primary susceptibility layer.</span></div>
+                <div><b>Census, DOH, NCES</b><span>Population and facility context used to motivate exposure categories.</span></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <p class="eyebrow">Why karst matters here</p>
+              <h2>Southeastern Pennsylvania combines carbonate geology with dense public infrastructure.</h2>
+              <p>
+                Karst risk is spatially uneven. It can be quiet for long periods, then become
+                important when subsurface voids, drainage change, construction disturbance, or
+                water movement concentrate near a structure. A county-scale model cannot
+                resolve the subsurface mechanism, but it can flag where exposure is clustered.
+              </p>
+              <p>
+                That makes the project a screening model: useful for prioritization, not for
+                parcel-level design. The dashboard makes that boundary explicit by separating
+                mapped susceptibility, synthetic exposure, KHI ranking, and uncertainty.
+              </p>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Conceptual lineage</p>
+              <h2>From mapped feature to decision cue</h2>
+              <div class="concept-flow">
+                <div>Mapped karst</div>
+                <div>Susceptibility proxy</div>
+                <div>Facility exposure</div>
+                <div>Criticality weighting</div>
+                <div>KHI ranking</div>
+                <div>Engineering follow-up</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="data">
+          <div class="data-grid">
+            <article class="panel">
+              <p class="eyebrow">Data lineage</p>
+              <h2>Source to result table</h2>
+              <div class="lineage-list">
+                <div><b>DCNR_PAKarst.dbf</b><span>lat, lon, karst type</span></div>
+                <div><b>karst_study_area.csv</b><span>filtered to Lehigh, Berks, Bucks, Montgomery, Chester</span></div>
+                <div><b>facilities.csv</b><span>fixed-seed synthetic hospitals, schools, fire/EMS, police</span></div>
+                <div><b>facilities_with_exposure.csv</b><span>distance, buffer, density, criticality, risk score</span></div>
+                <div><b>table4_top15_munis_KHI.csv</b><span>ranked municipality-like cells under KHI schemes</span></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <p class="eyebrow">Model formula</p>
+              <h2>KHI = 100 x (wH H + wE E + wC C)</h2>
+              <div class="formula-stack">
+                <div><b>H</b><span>normalized mapped-karst count per cell</span></div>
+                <div><b>E</b><span>normalized exposed-facility count per cell</span></div>
+                <div><b>C</b><span>normalized criticality-weighted exposure per cell</span></div>
+              </div>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Reproducible pipeline</p>
+              <h2>Run order</h2>
+              <div class="pipeline">
+                <div>01 Load karst</div>
+                <div>02 Facilities</div>
+                <div>03 Exposure</div>
+                <div>04 KHI</div>
+                <div>05 Figures</div>
+                <div>06 Presentation</div>
+              </div>
+              <pre><code>python scripts/run_all.py</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="exposure">
+          <div class="lab-grid">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Exposure lab</p>
+                  <h2>Facility type filter</h2>
+                </div>
+              </div>
+              <div class="type-filter" id="typeFilter"></div>
+              <div class="note-box" id="exposureNarrative"></div>
+            </article>
+            <article class="panel wide">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Filtered exposure</p>
+                  <h2>County pressure under active filters</h2>
+                </div>
+              </div>
+              <div id="exposureBars" class="chart tall" aria-label="Filtered county exposure chart"></div>
+            </article>
+            <article class="panel wide">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Buffer distribution</p>
+                  <h2>Facilities by proximity class</h2>
+                </div>
+              </div>
+              <div id="bufferDonut" class="donut-wrap" aria-label="Facility buffer exposure chart"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="khi">
+          <div class="khi-grid">
+            <article class="panel">
+              <p class="eyebrow">KHI Lab</p>
+              <h2>Custom weight test</h2>
+              <div class="slider-stack">
+                <label><span>Hazard weight</span><input id="hazardWeight" type="range" min="0" max="100" value="40"></label>
+                <label><span>Exposure weight</span><input id="exposureWeight" type="range" min="0" max="100" value="40"></label>
+                <label><span>Criticality weight</span><input id="criticalWeight" type="range" min="0" max="100" value="20"></label>
+              </div>
+              <div class="weight-readout" id="weightReadout"></div>
+            </article>
+
+            <article class="panel wide">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Rank sensitivity</p>
+                  <h2>Top municipality-like cells</h2>
+                </div>
+              </div>
+              <div id="khiList" class="khi-list" aria-label="Top KHI cells"></div>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Interpretation</p>
+              <h2>Stable high ranks are stronger screening targets.</h2>
+              <p>
+                Cells that stay near the top under base, hazard-led, and exposure-led weights
+                are more robust priorities. Cells that move sharply are useful uncertainty
+                flags because their priority depends on which CATModel dimension is emphasized.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="scenario">
+          <div class="scenario-grid">
+            <article class="panel">
+              <p class="eyebrow">Scenario builder</p>
+              <h2>Stress the assumptions</h2>
+              <div class="slider-stack">
+                <label><span>Hazard intensity</span><input id="hazardScale" type="range" min="50" max="160" value="100"></label>
+                <label><span>Damage severity</span><input id="damageScale" type="range" min="50" max="180" value="100"></label>
+                <label><span>Response capacity</span><input id="responseScale" type="range" min="0" max="100" value="35"></label>
+              </div>
+            </article>
+
+            <article class="panel">
+              <p class="eyebrow">Scenario result</p>
+              <h2 id="scenarioHeadline">Moderate stress case</h2>
+              <div id="scenarioGauge" class="gauge" aria-label="Scenario impact gauge"></div>
+              <p id="scenarioText"></p>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Loss proxy</p>
+              <h2>Relative scenario loss by county</h2>
+              <div id="lossBars" class="chart tall" aria-label="Relative loss proxy chart"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="outputs">
+          <div class="outputs-grid">
+            <article class="panel">
+              <p class="eyebrow">Deliverables</p>
+              <h2>Project artifacts</h2>
+              <div class="artifact-list">
+                <a href="https://github.com/noyo12394/pa-karst-catmodel" target="_blank" rel="noreferrer">GitHub repository</a>
+                <span>Python CATModel pipeline</span>
+                <span>CSV result tables</span>
+                <span>Matplotlib figures</span>
+                <span>10-slide PowerPoint generator</span>
+                <span>Vercel dashboard</span>
+              </div>
+            </article>
+
+            <article class="panel">
+              <p class="eyebrow">Limitations</p>
+              <h2>Use as screening, not design.</h2>
+              <ul class="plain-list">
+                <li>Mapped karst is a susceptibility proxy.</li>
+                <li>Facility points are synthetic and fixed-seed.</li>
+                <li>No fragility curves or service-area disruption model are included.</li>
+                <li>County bounding boxes replace polygon overlays for install simplicity.</li>
+              </ul>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Next upgrades</p>
+              <h2>How this becomes more realistic</h2>
+              <div class="upgrade-grid">
+                <div><b>Real facility inventory</b><span>Replace synthetic points with DOH, NCES, county public-safety records.</span></div>
+                <div><b>Municipal geometry</b><span>Swap grid cells for borough/township polygons and service districts.</span></div>
+                <div><b>Geotechnical covariates</b><span>Add carbonate geology, soil, drainage, slope, and historic subsidence data.</span></div>
+                <div><b>Fragility and loss</b><span>Move from relative loss proxy to damage states, downtime, and repair cost.</span></div>
+              </div>
+            </article>
+          </div>
+        </section>
       </section>
     </main>
 
