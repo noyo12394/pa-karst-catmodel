@@ -149,6 +149,32 @@ const formatPct = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const seededRandom = (() => {
+  let seed = 92842;
+  return () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+})();
+
+const motionParticles = Array.from({ length: 210 }, (_, index) => ({
+  angle: seededRandom() * Math.PI * 2,
+  radius: 38 + seededRandom() * 245,
+  speed: 0.18 + seededRandom() * 0.58,
+  depth: seededRandom(),
+  size: 0.9 + seededRandom() * 2.3,
+  drift: seededRandom() * Math.PI * 2,
+  county: counties[index % counties.length].name,
+}));
+
+const motionFacilities = [
+  { county: "Lehigh", x: 0.38, y: 0.38, pulse: 0.0 },
+  { county: "Berks", x: 0.27, y: 0.58, pulse: 0.35 },
+  { county: "Chester", x: 0.39, y: 0.76, pulse: 0.7 },
+  { county: "Montgomery", x: 0.54, y: 0.58, pulse: 1.1 },
+  { county: "Bucks", x: 0.66, y: 0.5, pulse: 1.45 },
+];
+
 function activeCounties() {
   return selectedCounty === "All"
     ? counties
@@ -221,6 +247,23 @@ function svgEl(tag, attrs = {}, children = []) {
     el.appendChild(typeof child === "string" ? document.createTextNode(child) : child);
   });
   return el;
+}
+
+function canvasRoundRect(ctx, x, y, width, height, radius) {
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, width, height, radius);
+    return;
+  }
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
 }
 
 function renderControls() {
@@ -712,6 +755,154 @@ function render() {
   renderAll();
 }
 
+function startHazardMotion() {
+  const canvas = document.querySelector("#hazardMotion");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
+
+  function resize() {
+    const box = canvas.getBoundingClientRect();
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    width = Math.max(1, box.width);
+    height = Math.max(1, box.height);
+    canvas.width = Math.floor(width * pixelRatio);
+    canvas.height = Math.floor(height * pixelRatio);
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  }
+
+  function drawCountyField(time) {
+    const sceneWidth = width < 900 ? width * 0.92 : width * 0.62;
+    const sceneLeft = width < 900 ? width * 0.04 : width * 0.055;
+    const sceneTop = height * 0.18;
+    const sceneHeight = height * 0.66;
+    const allBboxes = counties.map((county) => county.bbox);
+    const minLon = Math.min(...allBboxes.map((bbox) => bbox[0]));
+    const minLat = Math.min(...allBboxes.map((bbox) => bbox[1]));
+    const maxLon = Math.max(...allBboxes.map((bbox) => bbox[2]));
+    const maxLat = Math.max(...allBboxes.map((bbox) => bbox[3]));
+    const scaleX = (lon) => sceneLeft + ((lon - minLon) / (maxLon - minLon)) * sceneWidth;
+    const scaleY = (lat) => sceneTop + sceneHeight - ((lat - minLat) / (maxLat - minLat)) * sceneHeight;
+
+    counties.forEach((county) => {
+      const [minX, minY, maxX, maxY] = county.bbox;
+      const x = scaleX(minX);
+      const y = scaleY(maxY);
+      const w = scaleX(maxX) - scaleX(minX);
+      const h = scaleY(minY) - scaleY(maxY);
+      const active = selectedCounty === "All" || selectedCounty === county.name;
+      const shimmer = 0.08 + 0.05 * Math.sin(time * 0.0018 + county.density);
+      ctx.save();
+      ctx.globalAlpha = active ? 0.82 : 0.2;
+      ctx.fillStyle = `rgba(231, 232, 209, ${shimmer})`;
+      ctx.strokeStyle = active ? "rgba(231, 232, 209, 0.52)" : "rgba(231, 232, 209, 0.18)";
+      ctx.lineWidth = active ? 1.4 : 0.8;
+      ctx.beginPath();
+      canvasRoundRect(ctx, x, y, w, h, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, width, height);
+    const cx = width < 900 ? width * 0.52 : width * 0.34;
+    const cy = height * 0.52;
+    const funnelScale = width < 900 ? 0.78 : 1;
+    const exposureScale = selectedBuffer / 1000;
+
+    const glow = ctx.createRadialGradient(cx, cy, 8, cx, cy, Math.max(width, height) * 0.55);
+    glow.addColorStop(0, "rgba(184, 80, 66, 0.34)");
+    glow.addColorStop(0.36, "rgba(66, 106, 120, 0.2)");
+    glow.addColorStop(1, "rgba(47, 41, 37, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+
+    drawCountyField(time);
+
+    for (let ring = 0; ring < 4; ring += 1) {
+      const wobble = Math.sin(time * 0.0015 + ring) * 5;
+      const radiusX = (88 + ring * 52 + exposureScale * 26 + wobble) * funnelScale;
+      const radiusY = (28 + ring * 18 + exposureScale * 12 - wobble * 0.22) * funnelScale;
+      ctx.save();
+      ctx.translate(cx, cy + ring * 4);
+      ctx.rotate(time * 0.00018 * (ring + 1));
+      ctx.strokeStyle = ring === 0 ? "rgba(231, 232, 209, 0.54)" : "rgba(167, 190, 174, 0.26)";
+      ctx.lineWidth = ring === 0 ? 2.2 : 1.2;
+      ctx.setLineDash([10, 12]);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    motionParticles.forEach((particle) => {
+      const active = selectedCounty === "All" || selectedCounty === particle.county;
+      const spin = particle.angle + time * 0.001 * particle.speed;
+      const squeeze = 0.3 + particle.depth * 0.58;
+      const radius = particle.radius * (0.72 + 0.14 * Math.sin(time * 0.0016 + particle.drift)) * funnelScale;
+      const x = cx + Math.cos(spin) * radius * squeeze + Math.sin(time * 0.0009 + particle.drift) * 18;
+      const y =
+        cy +
+        Math.sin(spin) * radius * 0.32 +
+        (particle.depth - 0.52) * height * 0.5 -
+        Math.cos(spin * 1.7) * 7;
+      const alpha = active ? 0.26 + particle.depth * 0.56 : 0.07;
+      ctx.fillStyle = particle.depth > 0.62 ? `rgba(231, 232, 209, ${alpha})` : `rgba(184, 80, 66, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x, y, particle.size * (0.65 + exposureScale * 0.45), 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    motionFacilities.forEach((facility) => {
+      const active = selectedCounty === "All" || selectedCounty === facility.county;
+      const x = width * facility.x;
+      const y = height * facility.y;
+      const pulse = 0.5 + 0.5 * Math.sin(time * 0.003 + facility.pulse);
+      ctx.save();
+      ctx.globalAlpha = active ? 1 : 0.22;
+      ctx.strokeStyle = `rgba(231, 232, 209, ${0.22 + pulse * 0.28})`;
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(x, y, 14 + pulse * 20 * exposureScale, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = facility.county === "Lehigh" || facility.county === "Berks" ? COLORS.terracotta : COLORS.sage;
+      ctx.beginPath();
+      ctx.arc(x, y, 4 + pulse * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    ctx.save();
+    ctx.translate(cx, cy + height * 0.18);
+    ctx.scale(1, 0.3);
+    const coreGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 120 * funnelScale);
+    coreGradient.addColorStop(0, "rgba(184, 80, 66, 0.45)");
+    coreGradient.addColorStop(0.55, "rgba(231, 232, 209, 0.18)");
+    coreGradient.addColorStop(1, "rgba(231, 232, 209, 0)");
+    ctx.fillStyle = coreGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, 120 * funnelScale, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    if (!prefersReducedMotion) {
+      window.requestAnimationFrame(draw);
+    }
+  }
+
+  resize();
+  window.addEventListener("resize", resize);
+  window.requestAnimationFrame(draw);
+}
+
 renderControls();
 updateWeightSliders();
 render();
+startHazardMotion();
