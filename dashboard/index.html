@@ -36,7 +36,8 @@
             <select id="bufferSelect">
               <option value="100">100 m</option>
               <option value="250">250 m</option>
-              <option value="500" selected>500 m</option>
+              <option value="500">500 m</option>
+              <option value="1000" selected>1 km</option>
             </select>
           </label>
           <div class="segmented" role="group" aria-label="KHI weighting scheme">
@@ -66,18 +67,18 @@
         </article>
         <article class="metric-card">
           <span class="metric-label">Mapped Karst</span>
-          <strong id="metricKarst">41,760</strong>
-          <span class="metric-note">features in baseline</span>
+          <strong id="metricKarst">30,623</strong>
+          <span class="metric-note">study-area features</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Facilities</span>
-          <strong id="metricFacilities">1,047</strong>
-          <span class="metric-note">active facility filter</span>
+          <strong id="metricFacilities">1,717</strong>
+          <span class="metric-note">42 hospitals + 1,675 structures</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Within Buffer</span>
-          <strong id="metricExposed">366</strong>
-          <span class="metric-note" id="metricBufferNote">within 500 m</span>
+          <strong id="metricExposed">380</strong>
+          <span class="metric-note" id="metricBufferNote">within 1000 m</span>
         </article>
         <article class="metric-card">
           <span class="metric-label">Population</span>
@@ -146,16 +147,17 @@
                 susceptibility proxy, not a forecast of individual sinkholes.
               </p>
               <p>
-                The model then builds a synthetic essential-facility portfolio around
-                county population centers. Each facility receives a nearest-karst distance,
-                a buffer score, a 1 km local density score, and a type-based criticality
-                score. Those facility scores roll up into municipality-like cells for the
-                Karst Hazard Index.
+                The final analysis links 42 PA Department of Health hospital points and
+                1,675 USGS essential-structure points to the mapped karst inventory. Each
+                facility receives a nearest-karst distance, a buffer score, a 1 km local
+                density score, and a type-based criticality score. Those facility scores
+                roll up to real PennDOT municipality polygons for the Karst Hazard Index.
               </p>
               <p>
                 The result is a classroom-scale CATModel that is transparent enough to
-                defend in a presentation and structured enough to improve later with real
-                facility points, municipal polygons, fragility curves, and loss functions.
+                defend in a presentation and structured enough to improve later with
+                fragility curves, downtime models, climate covariates, and calibrated loss
+                functions.
               </p>
             </article>
 
@@ -188,9 +190,9 @@
               <div class="timeline">
                 <div><b>1</b><span>Scope five counties with high project relevance and manageable data volume.</span></div>
                 <div><b>2</b><span>Parse the DCNR DBF directly so the workflow avoids GeoPandas installation friction.</span></div>
-                <div><b>3</b><span>Generate fixed-seed facility points around population centers for reproducible classroom analysis.</span></div>
+                <div><b>3</b><span>Clip DOH hospitals and USGS essential structures to the five-county study area.</span></div>
                 <div><b>4</b><span>Score exposure using distance buffers, local mapped-feature density, and facility criticality.</span></div>
-                <div><b>5</b><span>Aggregate into KHI cells and test whether rankings survive changes in model weights.</span></div>
+                <div><b>5</b><span>Aggregate into municipal KHI rankings and test whether priorities survive changes in model weights.</span></div>
                 <div><b>6</b><span>Package results as tables, figures, a slide deck, GitHub repository, and Vercel dashboard.</span></div>
               </div>
             </article>
@@ -223,7 +225,7 @@
               <p>
                 That makes the project a screening model: useful for prioritization, not for
                 parcel-level design. The dashboard makes that boundary explicit by separating
-                mapped susceptibility, synthetic exposure, KHI ranking, and uncertainty.
+                mapped susceptibility, essential-facility exposure, KHI ranking, and uncertainty.
               </p>
             </article>
 
@@ -250,10 +252,16 @@
               <div class="lineage-list">
                 <div><b>DCNR_PAKarst.dbf</b><span>lat, lon, karst type</span></div>
                 <div><b>karst_study_area.csv</b><span>filtered to Lehigh, Berks, Bucks, Montgomery, Chester</span></div>
-                <div><b>facilities.csv</b><span>fixed-seed synthetic hospitals, schools, fire/EMS, police</span></div>
-                <div><b>facilities_with_exposure.csv</b><span>distance, buffer, density, criticality, risk score</span></div>
-                <div><b>table4_top15_munis_KHI.csv</b><span>ranked municipality-like cells under KHI schemes</span></div>
+                <div><b>PA DOH hospitals</b><span>42 real hospital points in the study area</span></div>
+                <div><b>USGS essential structures</b><span>1,675 clipped essential facilities used for exposure screening</span></div>
+                <div><b>PennDOT municipalities</b><span>287 real municipality polygons used for KHI ranking</span></div>
+                <div><b>Final result tables</b><span>distance buffers, hospital nearest-karst table, county exposure, KHI, sensitivity, and loss proxy</span></div>
               </div>
+              <p class="note-box">
+                The website is keyed to the final PDF/PPT results supplied for the project. Where source
+                artifacts had minor internal count conflicts, the dashboard uses the reconciled final-deck
+                facility total: 42 hospitals + 1,675 USGS essential structures = 1,717 facilities.
+              </p>
             </article>
 
             <article class="panel">
@@ -312,6 +320,15 @@
               </div>
               <div id="bufferDonut" class="donut-wrap" aria-label="Facility buffer exposure chart"></div>
             </article>
+            <article class="panel wide">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Critical facilities</p>
+                  <h2>Hospitals within 1 km of mapped karst</h2>
+                </div>
+              </div>
+              <div id="hospitalTable" class="table-wrap" aria-label="Hospitals nearest to mapped karst"></div>
+            </article>
           </div>
         </section>
 
@@ -332,7 +349,7 @@
               <div class="panel-heading">
                 <div>
                   <p class="eyebrow">Rank sensitivity</p>
-                  <h2>Top municipality-like cells</h2>
+                  <h2>Top municipalities</h2>
                 </div>
               </div>
               <div id="khiList" class="khi-list" aria-label="Top KHI cells"></div>
@@ -346,6 +363,7 @@
                 are more robust priorities. Cells that move sharply are useful uncertainty
                 flags because their priority depends on which CATModel dimension is emphasized.
               </p>
+              <div id="sensitivityTable" class="table-wrap" aria-label="KHI rank sensitivity table"></div>
             </article>
           </div>
         </section>
@@ -384,6 +402,7 @@
               <h2>Project artifacts</h2>
               <div class="artifact-list">
                 <a href="https://github.com/noyo12394/pa-karst-catmodel" target="_blank" rel="noreferrer">GitHub repository</a>
+                <a href="https://github.com/noyo12394/pa-karst-catmodel/blob/main/docs/final-results-brief.md" target="_blank" rel="noreferrer">Final results brief</a>
                 <span>Python CATModel pipeline</span>
                 <span>CSV result tables</span>
                 <span>Matplotlib figures</span>
@@ -397,9 +416,9 @@
               <h2>Use as screening, not design.</h2>
               <ul class="plain-list">
                 <li>Mapped karst is a susceptibility proxy.</li>
-                <li>Facility points are synthetic and fixed-seed.</li>
+                <li>Facility locations depend on public-source coordinate completeness and classification consistency.</li>
                 <li>No fragility curves or service-area disruption model are included.</li>
-                <li>County bounding boxes replace polygon overlays for install simplicity.</li>
+                <li>Exposure buffers identify screening priority, not site-specific foundation performance.</li>
               </ul>
             </article>
 
@@ -407,8 +426,8 @@
               <p class="eyebrow">Next upgrades</p>
               <h2>How this becomes more realistic</h2>
               <div class="upgrade-grid">
-                <div><b>Real facility inventory</b><span>Replace synthetic points with DOH, NCES, county public-safety records.</span></div>
-                <div><b>Municipal geometry</b><span>Swap grid cells for borough/township polygons and service districts.</span></div>
+                <div><b>Facility inventory QA</b><span>Cross-check DOH, USGS, NCES, and county public-safety records facility by facility.</span></div>
+                <div><b>Service geometry</b><span>Add hospital catchments, school districts, EMS response zones, and redundancy metrics.</span></div>
                 <div><b>Geotechnical covariates</b><span>Add carbonate geology, soil, drainage, slope, and historic subsidence data.</span></div>
                 <div><b>Fragility and loss</b><span>Move from relative loss proxy to damage states, downtime, and repair cost.</span></div>
               </div>

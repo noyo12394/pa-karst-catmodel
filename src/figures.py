@@ -169,7 +169,7 @@ def make_fig7(out_path: Path | None = None) -> Path:
     ax.axis("off")
     steps = [
         ("1", "Parse DCNR DBF\nand filter counties"),
-        ("2", "Generate synthetic\nessential facilities"),
+        ("2", "Prepare essential\nfacility inventory"),
         ("3", "Nearest karst,\nbuffers, density"),
         ("4", "Aggregate KHI\nand sensitivity"),
         ("5", "Tables, figures,\nfinal PPTX"),

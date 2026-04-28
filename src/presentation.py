@@ -155,9 +155,9 @@ def _slide_intro(prs: Presentation, blank: Any, page: int) -> None:
     slide = _content_slide(prs, blank, "Introduction & Study Area", page)
     stats = [
         ("5", "counties"),
-        ("41,760", "karst features"),
-        ("2.85M", "population"),
-        ("7,973", "km2"),
+        ("30,623", "karst features"),
+        ("1,717", "essential facilities"),
+        ("287", "municipalities"),
     ]
     for idx, (value, label) in enumerate(stats):
         x = 0.8 + idx * 3.05
@@ -172,7 +172,7 @@ def _slide_intro(prs: Presentation, blank: Any, page: int) -> None:
         2.7,
         [
             ("Karst terrain creates localized ground-failure susceptibility that can matter disproportionately for hospitals, schools, emergency services, and police facilities.", 20, False, DARK, False, 12),
-            ("This project builds a transparent CATModel-style screening workflow using mapped DCNR karst features, synthetic essential-facility points, proximity buffers, and municipality-scale KHI rankings.", 18, False, DARK, False, 0),
+            ("This project builds a transparent CATModel-style screening workflow using mapped DCNR karst features, PA DOH hospitals, USGS essential structures, proximity buffers, and municipality-scale KHI rankings.", 18, False, DARK, False, 0),
         ],
     )
 
@@ -301,8 +301,8 @@ def _slide_conclusion(prs: Presentation, blank: Any, page: int) -> None:
     slide = _content_slide(prs, blank, "Conclusion", page)
     columns = [
         ("CATModel takeaways", "A lightweight hazard, exposure, and criticality workflow can identify where karst screening deserves closer engineering attention."),
-        ("Limitations", "The hazard layer is binary, facility points are synthesized, and no fragility curves or service disruption model are included."),
-        ("Future work", "Replace synthetic facilities, use municipal polygons, add geotechnical covariates, and calibrate event likelihood or damage functions."),
+        ("Limitations", "Mapped karst is a susceptibility proxy, public facility coordinates require QA, and no fragility curves or service disruption model are included."),
+        ("Future work", "Add facility QA, service-area geometry, geotechnical covariates, and calibrated event likelihood or damage functions."),
     ]
     for idx, (title, body) in enumerate(columns):
         x = 0.75 + idx * 4.18

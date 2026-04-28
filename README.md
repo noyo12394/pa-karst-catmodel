@@ -22,7 +22,7 @@ The pipeline writes processed CSVs to `data/processed/`, result tables to `outpu
 
 ## Dashboard and Vercel
 
-This repository includes a static project hub in `dashboard/` for web presentation of the model baseline, literature context, methodology, interactive exposure/KHI views, scenario testing, and project outputs. Build it locally with:
+This repository includes a static project hub in `dashboard/` for web presentation of the final PDF/PPT results, literature context, methodology, interactive exposure/KHI views, scenario testing, and project outputs. Build it locally with:
 
 ```bash
 npm run build
@@ -53,11 +53,13 @@ pa-karst-catmodel/
 
 ## Methodology Summary
 
-This project reframes mapped karst as a susceptibility proxy rather than a deterministic sinkhole forecast. The PASDA/DCNR DBF is parsed with a pure-Python reader, converted into latitude/longitude records, assigned to one of five study-area counties by bounding box, and summarized by county and feature type. This avoids heavyweight geospatial dependencies while keeping the workflow reproducible on a standard Python environment.
+This project reframes mapped karst as a susceptibility proxy rather than a deterministic sinkhole forecast. The final result set uses 30,623 mapped karst features from the PASDA/DCNR Pennsylvania Karst Inventory clipped to Lehigh, Berks, Bucks, Montgomery, and Chester Counties. Those features are summarized by county, feature type, and local density to show where mapped carbonate-related ground-failure susceptibility is spatially concentrated.
 
-Essential facilities are represented with a synthetic but fixed-seed exposure inventory. Hospitals, schools, fire/EMS stations, and police facilities are generated around county population centers using type-specific spatial jitter, then scored by nearest mapped karst distance, local karst density within 1 km, and facility criticality. Buffer zones at 100 m, 250 m, and 500 m translate proximity into a simple exposure score.
+Essential-facility exposure is calculated from 42 PA Department of Health hospital points and 1,675 USGS National Map essential-structure points. Each facility is scored by nearest mapped karst distance, buffer class, local karst density within 1 km, and facility criticality. The 100 m, 250 m, 500 m, and 1 km screening bands are used as planning-level proximity classes rather than direct damage states.
 
-The Karst Hazard Index (KHI) aggregates the hazard, exposure, and criticality dimensions to coarse municipality-like grid cells. Three weighting schemes test whether rankings are stable when the model is hazard-led, exposure-led, or balanced. The result is a transparent CATModel-style screening tool that identifies where more detailed engineering or site-specific geotechnical review would be most valuable.
+The Karst Hazard Index (KHI) aggregates hazard, exposure, and criticality across 287 PennDOT municipality polygons. Three weighting schemes test whether rankings are stable when the model is hazard-led, exposure-led, or balanced. The result is a transparent CATModel-style screening tool that identifies where more detailed engineering or site-specific geotechnical review would be most valuable.
+
+For a concise final-result narrative, see [`docs/final-results-brief.md`](docs/final-results-brief.md).
 
 ## Data Sources
 
@@ -70,9 +72,9 @@ The Karst Hazard Index (KHI) aggregates the hazard, exposure, and criticality di
 ## Limitations
 
 - The hazard layer is treated as a binary susceptibility proxy; it is not a time-dependent sinkhole probability model.
-- Facility locations are synthesized from population centers and facility counts, so they support classroom-scale exposure screening but not parcel-level decisions.
+- Facility coordinates and classifications depend on the completeness of public DOH and USGS source inventories.
 - The model does not include fragility curves, structural vulnerability, repair duration, redundancy, or service-area disruption.
-- County bounding boxes are used for assignment instead of polygon overlays to keep the project install-light and reproducible without GeoPandas.
+- Exposure buffers are screening distances, not geotechnical proof of sinkhole initiation, propagation, or facility damage.
 - Loss proxy values are relative scenario indicators, not dollar-denominated loss estimates.
 
 ## Citations
