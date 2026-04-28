@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="PA karst hazard CATModel dashboard for essential-facility exposure in southeastern Pennsylvania."
+    >
+    <title>PA Karst CATModel Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar" aria-label="Dashboard summary">
+        <div>
+          <p class="eyebrow">Lehigh CAT402 / CEE332</p>
+          <h1>PA Karst Hazard CATModel</h1>
+        </div>
+        <div class="toolbar" aria-label="Dashboard controls">
+          <label class="select-wrap">
+            <span>County</span>
+            <select id="countySelect"></select>
+          </label>
+          <div class="segmented" role="group" aria-label="KHI weighting scheme">
+            <button type="button" class="segment active" data-scheme="Base">Base</button>
+            <button type="button" class="segment" data-scheme="Hazard-led">Hazard</button>
+            <button type="button" class="segment" data-scheme="Exposure-led">Exposure</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Key model metrics">
+        <article class="metric-card">
+          <span class="metric-label">Study Counties</span>
+          <strong id="metricCounties">5</strong>
+          <span class="metric-note">southeastern Pennsylvania</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Mapped Karst</span>
+          <strong id="metricKarst">41,760</strong>
+          <span class="metric-note">features in model baseline</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Facilities</span>
+          <strong id="metricFacilities">1,047</strong>
+          <span class="metric-note">synthetic essential points</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Population</span>
+          <strong id="metricPopulation">2.85M</strong>
+          <span class="metric-note">county total</span>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel map-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Spatial screen</p>
+              <h2>Hazard and exposure by county</h2>
+            </div>
+            <span id="selectedBadge" class="status-pill">All counties</span>
+          </div>
+          <div id="mapViz" class="map-viz" role="img" aria-label="County map with karst and exposure points"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">County comparison</p>
+              <h2>Exposure pressure</h2>
+            </div>
+          </div>
+          <div id="countyBars" class="chart" aria-label="County exposure bar chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Facility portfolio</p>
+              <h2>Critical assets by type</h2>
+            </div>
+          </div>
+          <div id="facilityMix" class="chart" aria-label="Facility mix chart"></div>
+        </article>
+
+        <article class="panel khi-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Municipality cells</p>
+              <h2>KHI rank sensitivity</h2>
+            </div>
+          </div>
+          <div id="khiList" class="khi-list" aria-label="Top KHI cells"></div>
+        </article>
+
+        <article class="panel wide-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Scenario lens</p>
+              <h2>Loss proxy and buffer exposure</h2>
+            </div>
+          </div>
+          <div class="dual-chart">
+            <div id="lossBars" class="chart compact" aria-label="Relative loss proxy chart"></div>
+            <div id="bufferDonut" class="donut-wrap" aria-label="Facility buffer exposure chart"></div>
+          </div>
+        </article>
+
+        <article class="panel model-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Model contract</p>
+              <h2>Pipeline outputs</h2>
+            </div>
+          </div>
+          <ul class="pipeline-list">
+            <li><span></span>DBF parser writes cleaned karst records</li>
+            <li><span></span>Facility generator fixes seed at 42</li>
+            <li><span></span>Exposure scores combine density, proximity, and criticality</li>
+            <li><span></span>KHI ranks run three sensitivity schemes</li>
+            <li><span></span>Python PPTX builder composes the final deck</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

@@ -6,6 +6,8 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+.vercel/
+dist/
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*

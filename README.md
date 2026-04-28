@@ -20,6 +20,20 @@ python scripts/run_all.py
 
 The pipeline writes processed CSVs to `data/processed/`, result tables to `outputs/tables/`, figures to `outputs/figures/`, and the final slide deck to `outputs/presentation/PA_Karst_Final_Presentation.pptx`.
 
+## Dashboard and Vercel
+
+This repository includes a static dashboard in `dashboard/` for web presentation of the model baseline. Build it locally with:
+
+```bash
+npm run build
+```
+
+The Vercel deployment uses `vercel.json` to run the dashboard build and serve the generated `dist/` directory. Deploy directly to production with:
+
+```bash
+vercel --prod --yes
+```
+
 ## Directory Structure
 
 ```text
@@ -32,6 +46,7 @@ pa-karst-catmodel/
 │   ├── tables/       # CSV result tables
 │   └── presentation/ # final PPTX
 ├── scripts/          # runnable pipeline steps
+├── dashboard/        # static web dashboard for Vercel
 ├── src/              # model source code
 └── tests/            # pytest unit tests
 ```

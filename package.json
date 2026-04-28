@@ -1,0 +1,10 @@
+{
+  "name": "pa-karst-catmodel-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node dashboard/build.mjs",
+    "serve": "python3 -m http.server 4173 --directory dashboard"
+  }
+}
