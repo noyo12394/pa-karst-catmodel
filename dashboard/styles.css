@@ -171,6 +171,90 @@ button {
   font-weight: 800;
 }
 
+.field-gallery {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) repeat(3, minmax(210px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.gallery-intro,
+.photo-card {
+  min-height: 285px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.gallery-intro {
+  padding: 18px;
+}
+
+.gallery-intro h2 {
+  font-size: 1.18rem;
+}
+
+.photo-card {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 285px;
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.04);
+  transition:
+    transform 450ms ease,
+    filter 450ms ease;
+}
+
+.photo-card:hover img {
+  transform: scale(1.035);
+  filter: saturate(1.06) contrast(1.08);
+}
+
+.photo-card figcaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  color: var(--white);
+  background: linear-gradient(0deg, rgba(31, 42, 46, 0.92), rgba(31, 42, 46, 0.2));
+}
+
+.photo-card b,
+.photo-card span,
+.photo-card a {
+  display: block;
+}
+
+.photo-card b {
+  font-size: 0.92rem;
+}
+
+.photo-card span {
+  color: rgba(251, 250, 245, 0.82);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.photo-card a {
+  width: fit-content;
+  color: var(--sand);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
 .title-block {
   max-width: 820px;
 }
@@ -746,6 +830,7 @@ input[type="range"] {
 @media (max-width: 1180px) {
   .topbar,
   .motion-band,
+  .field-gallery,
   .overview-grid,
   .two-col,
   .literature-grid,
@@ -785,6 +870,15 @@ input[type="range"] {
     max-width: 620px;
   }
 
+  .field-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gallery-intro {
+    grid-column: 1 / -1;
+    min-height: auto;
+  }
+
   .concept-flow,
   .pipeline,
   .timeline {
@@ -800,6 +894,7 @@ input[type="range"] {
 
   .topbar,
   .motion-band,
+  .field-gallery,
   .overview-grid,
   .two-col,
   .literature-grid,
@@ -842,6 +937,11 @@ input[type="range"] {
 
   .motion-stats {
     grid-template-columns: 1fr;
+  }
+
+  .photo-card,
+  .photo-card img {
+    min-height: 260px;
   }
 
   .mini-table div,
