@@ -1,4 +1,4 @@
-import { copyFile, mkdir, rm } from "node:fs/promises";
+import { copyFile, cp, mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,5 +13,7 @@ await mkdir(target, { recursive: true });
 for (const file of files) {
   await copyFile(join(source, file), join(target, file));
 }
+
+await cp(join(source, "assets"), join(target, "assets"), { recursive: true });
 
 console.log(`Dashboard build complete: ${target}`);

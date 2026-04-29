@@ -34,6 +34,8 @@ The Vercel deployment uses `vercel.json` to run the dashboard build and serve th
 vercel --prod --yes
 ```
 
+The dashboard also includes GIS evidence assets in `dashboard/assets/` and source map-layout PDFs in `project-assets/gis/`, including ArcGIS Pro clipping workflow screenshots and exported map layouts used in the final presentation narrative.
+
 ## Directory Structure
 
 ```text

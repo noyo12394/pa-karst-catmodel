@@ -12,12 +12,13 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
 
-from src.config import OUT_FIGURES, OUT_PRESENTATION, OUT_TABLES
+from src.config import OUT_FIGURES, OUT_PRESENTATION, OUT_TABLES, PROJECT_ROOT
 from src.figures import DARK, SAGE, SAND, TERRACOTTA
 
 WIDE_WIDTH = 13.333
 WIDE_HEIGHT = 7.5
 COURSE_FOOTER = "Lehigh University CAT402/CEE332 - PA Karst Hazard CATModel"
+DASHBOARD_ASSETS = PROJECT_ROOT / "dashboard" / "assets"
 
 
 def add_rect(
@@ -232,8 +233,24 @@ def _slide_method2(prs: Presentation, blank: Any, page: int) -> None:
 
 
 def _slide_workflow(prs: Presentation, blank: Any, page: int) -> None:
-    slide = _content_slide(prs, blank, "Workflow", page)
-    _add_picture_or_placeholder(slide, OUT_FIGURES / "fig7_flowchart.png", 0.85, 1.35, 11.6, 4.8)
+    slide = _content_slide(prs, blank, "Workflow & GIS Evidence", page)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "arcgis-clip-workflow.png", 0.62, 1.12, 6.35, 3.15)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "county-exposure-layout.png", 7.22, 1.12, 2.45, 3.15)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "karst-density-layout.png", 9.88, 1.12, 2.45, 3.15)
+    add_multi_text(
+        slide,
+        0.72,
+        4.62,
+        11.75,
+        1.45,
+        [
+            ("GIS workflow proof", 20, True, TERRACOTTA, False, 8),
+            ("The ArcGIS Pro clip screenshot and exported layouts document the preprocessing chain: statewide layers were clipped to the five-county study area, mapped karst was visualized as a hazard proxy, and the density layout supported the final dashboard and PowerPoint interpretation.", 14, False, DARK, False, 0),
+        ],
+    )
+    add_text(slide, 0.75, 6.24, 3.4, 0.28, "ArcGIS geoprocessing screenshot", 9, False, DARK)
+    add_text(slide, 7.25, 4.45, 2.35, 0.28, "County hazard proxy", 9, False, DARK, "center")
+    add_text(slide, 9.9, 4.45, 2.35, 0.28, "Kernel density layout", 9, False, DARK, "center")
 
 
 def _slide_result1(prs: Presentation, blank: Any, page: int) -> None:

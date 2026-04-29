@@ -20,3 +20,4 @@ outputs/presentation/*
 !outputs/presentation/.gitkeep
 *.pptx
 *.pdf
+!project-assets/gis/*.pdf
