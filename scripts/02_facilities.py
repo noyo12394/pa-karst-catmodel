@@ -1,4 +1,4 @@
-"""Run Step 2: generate synthetic essential facilities."""
+"""Run Step 2: load real essential facilities or generate a fallback inventory."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.facilities import generate_facilities
+from src.facilities import load_or_generate_facilities
 
 
 def main() -> None:
-    """Generate fixed-seed synthetic facilities."""
-    generate_facilities()
+    """Prepare essential facilities for the exposure model."""
+    load_or_generate_facilities()
 
 
 if __name__ == "__main__":

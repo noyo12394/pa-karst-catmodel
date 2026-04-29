@@ -8,14 +8,15 @@ from typing import Any
 
 import pandas as pd
 
-from src.config import COUNTY_AREA_KM2, COUNTY_BBOX, COUNTY_POP, DATA_PROCESSED
-from src.geo_utils import assign_county
+from src.boundaries import BoundaryFeature, assign_boundary, load_county_boundaries
+from src.config import COUNTY_AREA_KM2, COUNTY_POP, DATA_PROCESSED
 from src.io_utils import read_dbf
 
 
 def load_and_filter_karst(dbf_path: Path) -> pd.DataFrame:
     """Parse the DCNR karst DBF and save study-area karst records."""
     _, records = read_dbf(dbf_path)
+    county_boundaries = load_county_boundaries()
     raw_df = pd.DataFrame(records)
     if raw_df.empty:
         karst_df = pd.DataFrame(columns=["lat", "lon", "karst_type", "county"])
@@ -49,7 +50,7 @@ def load_and_filter_karst(dbf_path: Path) -> pd.DataFrame:
 
         karst_df = raw_df[["lat", "lon", "karst_type"]].dropna(subset=["lat", "lon"]).copy()
         karst_df["county"] = [
-            assign_county(float(row.lon), float(row.lat), COUNTY_BBOX)
+            _assign_county(float(row.lon), float(row.lat), county_boundaries)
             for row in karst_df.itertuples(index=False)
         ]
         karst_df = karst_df.dropna(subset=["county"]).reset_index(drop=True)
@@ -57,8 +58,15 @@ def load_and_filter_karst(dbf_path: Path) -> pd.DataFrame:
 
     DATA_PROCESSED.mkdir(parents=True, exist_ok=True)
     karst_df.to_csv(DATA_PROCESSED / "karst_study_area.csv", index=False)
-    _write_summary(raw_total=len(records), karst_df=karst_df)
+    _write_summary(raw_total=len(records), karst_df=karst_df, counties=county_boundaries)
     return karst_df
+
+
+def _assign_county(
+    lon: float, lat: float, county_boundaries: list[BoundaryFeature]
+) -> str | None:
+    boundary = assign_boundary(lon, lat, county_boundaries)
+    return boundary.county if boundary is not None else None
 
 
 def _find_column(
@@ -79,14 +87,37 @@ def _find_column(
     return None
 
 
-def _write_summary(raw_total: int, karst_df: pd.DataFrame) -> None:
+def _write_summary(
+    raw_total: int, karst_df: pd.DataFrame, counties: list[BoundaryFeature]
+) -> None:
+    area_lookup = {
+        county.county: county.area_km2
+        for county in counties
+        if county.area_km2 > 0
+    } or COUNTY_AREA_KM2
+    by_county_counts = karst_df["county"].value_counts().to_dict()
+    by_county = {
+        county: {
+            "karst_count": int(by_county_counts.get(county, 0)),
+            "area_km2": float(area_lookup.get(county, 0.0)),
+            "karst_density_km2": round(
+                int(by_county_counts.get(county, 0)) / float(area_lookup.get(county, 1.0)),
+                3,
+            )
+            if float(area_lookup.get(county, 0.0)) > 0
+            else 0.0,
+            "population": int(COUNTY_POP.get(county, 0)),
+        }
+        for county in COUNTY_POP
+    }
     summary: dict[str, Any] = {
         "total_statewide": raw_total,
         "total_study_area": int(len(karst_df)),
         "type_distribution": karst_df["karst_type"].value_counts().to_dict(),
-        "by_county": karst_df["county"].value_counts().to_dict(),
-        "county_area_km2": COUNTY_AREA_KM2,
+        "by_county": by_county,
+        "county_area_km2": area_lookup,
         "county_population": COUNTY_POP,
+        "assignment_method": "county polygon" if any(c.area_km2 > 0 for c in counties) else "bbox",
     }
     with (DATA_PROCESSED / "karst_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2)

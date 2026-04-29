@@ -7,9 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.config import DATA_RAW, OUT_PRESENTATION
+from src.config import DATA_RAW, KARST_DBF_CANDIDATES, OUT_PRESENTATION
 from src.exposure import compute_exposure, summary_tables
-from src.facilities import generate_facilities
+from src.facilities import load_or_generate_facilities
 from src.figures import make_all_figures
 from src.khi import compute_khi, loss_proxy, sensitivity_analysis
 from src.load_karst import load_and_filter_karst
@@ -22,8 +22,8 @@ def main() -> None:
     print(f"Step 1/6: loading karst DBF from {dbf_path}")
     karst = load_and_filter_karst(dbf_path)
 
-    print("Step 2/6: generating synthetic essential facilities")
-    facilities = generate_facilities()
+    print("Step 2/6: loading real facilities or generating fallback inventory")
+    facilities = load_or_generate_facilities()
 
     print("Step 3/6: computing facility exposure")
     facilities = compute_exposure(karst, facilities)
@@ -44,10 +44,10 @@ def main() -> None:
 
 
 def _resolve_dbf() -> Path:
-    preferred = DATA_RAW / "DCNR_PAKarst.dbf"
-    if preferred.exists():
-        return preferred
-    matches = sorted(DATA_RAW.glob("*.dbf"))
+    for candidate in KARST_DBF_CANDIDATES:
+        if candidate.exists():
+            return candidate
+    matches = sorted(DATA_RAW.rglob("DCNR_PAKarst.dbf"))
     if matches:
         return matches[0]
     raise FileNotFoundError(

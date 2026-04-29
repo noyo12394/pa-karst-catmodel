@@ -11,6 +11,20 @@ OUT_FIGURES: Path = PROJECT_ROOT / "outputs" / "figures"
 OUT_TABLES: Path = PROJECT_ROOT / "outputs" / "tables"
 OUT_PRESENTATION: Path = PROJECT_ROOT / "outputs" / "presentation"
 
+KARST_DBF_CANDIDATES: tuple[Path, ...] = (
+    DATA_RAW / "DCNR_PAKarst.dbf",
+    DATA_RAW / "DCNR_PAKarst" / "DCNR_PAKarst.dbf",
+)
+COUNTY_ZIP: Path = DATA_RAW / "PaCounty2026_01.zip"
+MUNICIPALITY_ZIP: Path = DATA_RAW / "PaMunicipalities2026_01.zip"
+DOH_HOSPITALS_ZIP: Path = DATA_RAW / "DOH_Hospitals202511.zip"
+STRUCT_POINT_SHP: Path = (
+    DATA_RAW / "STRUCT_Pennsylvania_State_Shape" / "Shape" / "Struct_Point.shp"
+)
+STRUCT_POINT_DBF: Path = (
+    DATA_RAW / "STRUCT_Pennsylvania_State_Shape" / "Shape" / "Struct_Point.dbf"
+)
+
 COUNTY_BBOX: dict[str, tuple[float, float, float, float]] = {
     "Lehigh": (-75.840, 40.402, -75.354, 40.789),
     "Berks": (-76.246, 40.197, -75.604, 40.581),
@@ -91,6 +105,7 @@ BUFFER_ZONES: list[tuple[float, str, float]] = [
     (100, "100m", 1.0),
     (250, "250m", 0.7),
     (500, "500m", 0.4),
+    (1000, "1000m", 0.2),
     (float("inf"), "outside", 0.1),
 ]
 
@@ -98,12 +113,14 @@ KHI_SCHEMES: dict[str, tuple[float, float, float]] = {
     "Base": (0.40, 0.40, 0.20),
     "Hazard-led": (0.60, 0.25, 0.15),
     "Exposure-led": (0.25, 0.60, 0.15),
+    "Critical-facility": (0.30, 0.35, 0.35),
 }
 
 DAMAGE_RATIO: dict[str, float] = {
     "100m": 0.30,
     "250m": 0.15,
     "500m": 0.05,
+    "1000m": 0.01,
     "outside": 0.0,
 }
 

@@ -22,7 +22,7 @@ def compute_exposure(karst_df: pd.DataFrame, facilities_df: pd.DataFrame) -> pd.
         lon = float(facility["lon"])
         lat = float(facility["lat"])
         nearest_distance, nearest_type = grid.nearest(lon, lat, search_cells=12)
-        buffer_zone, proximity_score = _buffer_for_distance(nearest_distance)
+        buffer_zone, proximity_score = buffer_for_distance(nearest_distance)
         density_count = _count_within(grid, lon, lat, radius_m=1000.0, search_cells=12)
         density_counts.append(density_count)
 
@@ -83,11 +83,17 @@ def summary_tables(facilities_df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
     grouped = facilities_df.groupby("county", sort=False)
     table3 = grouped.agg(total=("fid", "count")).reset_index()
-    exposed = (
+    exposed_500 = (
         facilities_df[facilities_df["nearest_karst_m"] <= 500.0]
         .groupby("county")
         .size()
         .rename("exposed_within_500m")
+    )
+    exposed_1000 = (
+        facilities_df[facilities_df["nearest_karst_m"] <= 1000.0]
+        .groupby("county")
+        .size()
+        .rename("exposed_within_1000m")
     )
     weighted = (
         facilities_df.assign(
@@ -96,10 +102,20 @@ def summary_tables(facilities_df: pd.DataFrame) -> dict[str, pd.DataFrame]:
         .groupby("county")["weighted_exposure"]
         .sum()
     )
-    table3 = table3.merge(exposed, on="county", how="left").merge(weighted, on="county", how="left")
+    table3 = (
+        table3.merge(exposed_500, on="county", how="left")
+        .merge(exposed_1000, on="county", how="left")
+        .merge(weighted, on="county", how="left")
+    )
     table3["exposed_within_500m"] = table3["exposed_within_500m"].fillna(0).astype(int)
+    table3["exposed_within_1000m"] = table3["exposed_within_1000m"].fillna(0).astype(int)
     table3["weighted_exposure"] = table3["weighted_exposure"].fillna(0.0).round(3)
-    table3["pct"] = (100.0 * table3["exposed_within_500m"] / table3["total"]).round(1)
+    table3["pct_within_500m"] = (
+        100.0 * table3["exposed_within_500m"] / table3["total"]
+    ).round(1)
+    table3["pct_within_1000m"] = (
+        100.0 * table3["exposed_within_1000m"] / table3["total"]
+    ).round(1)
     table3.to_csv(OUT_TABLES / "table3_county_summary.csv", index=False)
 
     return {
@@ -109,11 +125,16 @@ def summary_tables(facilities_df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     }
 
 
-def _buffer_for_distance(distance_m: float) -> tuple[str, float]:
+def buffer_for_distance(distance_m: float) -> tuple[str, float]:
+    """Return the configured proximity buffer label and score for a distance."""
     for max_meters, label, proximity_score in BUFFER_ZONES:
         if distance_m <= max_meters:
             return label, proximity_score
     return "outside", 0.1
+
+
+def _buffer_for_distance(distance_m: float) -> tuple[str, float]:
+    return buffer_for_distance(distance_m)
 
 
 def _count_within(

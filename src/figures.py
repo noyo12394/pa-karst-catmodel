@@ -54,7 +54,13 @@ def make_fig2(
     _overlay_counties(ax)
 
     marker_map = {"hospital": "P", "school": "o", "fire_ems": "^", "police": "s"}
-    color_map = {"100m": TERRACOTTA, "250m": "#D98C5F", "500m": SAGE, "outside": "#78909C"}
+    color_map = {
+        "100m": TERRACOTTA,
+        "250m": "#D98C5F",
+        "500m": SAGE,
+        "1000m": "#78909C",
+        "outside": "#B0BEC5",
+    }
     for ftype, marker in marker_map.items():
         subset = facilities_df[facilities_df["type"] == ftype]
         if subset.empty:
@@ -146,12 +152,21 @@ def make_fig6(sensitivity_df: pd.DataFrame, out_path: Path | None = None) -> Pat
     top10 = sensitivity_df.head(10).copy()
     labels = top10["label"].astype(str).str.replace(" cell", "", regex=False)
     x = np.arange(len(top10))
-    width = 0.25
+    rank_columns = [column for column in top10.columns if column.startswith("rank_")]
+    width = min(0.18, 0.72 / max(len(rank_columns), 1))
+    colors = [TERRACOTTA, SAGE, "#78909C", "#C99B3F", "#6D4C41"]
 
     fig, ax = plt.subplots(figsize=(11, 6))
-    ax.bar(x - width, top10["rank_Base"], width=width, color=TERRACOTTA, label="Base")
-    ax.bar(x, top10["rank_Hazard-led"], width=width, color=SAGE, label="Hazard-led")
-    ax.bar(x + width, top10["rank_Exposure-led"], width=width, color="#78909C", label="Exposure-led")
+    start = -0.5 * width * (len(rank_columns) - 1)
+    for idx, column in enumerate(rank_columns):
+        scheme = column.replace("rank_", "")
+        ax.bar(
+            x + start + idx * width,
+            top10[column],
+            width=width,
+            color=colors[idx % len(colors)],
+            label=scheme,
+        )
     ax.invert_yaxis()
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=8)
