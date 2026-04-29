@@ -7,6 +7,15 @@
       name="description"
       content="PA karst hazard CATModel project hub for literature, methods, exposure analysis, KHI sensitivity, and Vercel-ready results."
     >
+    <meta property="og:title" content="PA Karst Hazard CATModel">
+    <meta
+      property="og:description"
+      content="Lehigh CAT402/CEE332 project hub for karst susceptibility, facility exposure, KHI sensitivity, GIS evidence, and final deliverables."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pa-karst-catmodel.vercel.app">
+    <meta property="og:image" content="https://pa-karst-catmodel.vercel.app/assets/karst-density-layout.png">
+    <meta name="twitter:card" content="summary_large_image">
     <title>PA Karst CATModel Project Hub</title>
     <link
       rel="icon"
@@ -44,6 +53,7 @@
             <button type="button" class="segment active" data-scheme="Base">Base</button>
             <button type="button" class="segment" data-scheme="Hazard-led">Hazard</button>
             <button type="button" class="segment" data-scheme="Exposure-led">Exposure</button>
+            <button type="button" class="segment" data-scheme="Critical-facility">Critical</button>
           </div>
         </div>
       </section>
@@ -61,8 +71,8 @@
         </div>
         <div class="motion-stats" aria-label="Animated field metrics">
           <div><b>30,623</b><span>karst features</span></div>
-          <div><b>380</b><span>within 1 km</span></div>
-          <div><b>0.942</b><span>KHI rank rho</span></div>
+          <div><b>455</b><span>within 1 km</span></div>
+          <div><b>0.957</b><span>KHI rank rho</span></div>
         </div>
       </section>
 
@@ -150,11 +160,14 @@
       <nav class="tabbar" aria-label="Project sections">
         <button class="tab active" type="button" data-tab="overview">Overview</button>
         <button class="tab" type="button" data-tab="story">Project Idea</button>
+        <button class="tab" type="button" data-tab="animation">Animation</button>
+        <button class="tab" type="button" data-tab="gallery">Gallery</button>
         <button class="tab" type="button" data-tab="literature">Literature</button>
         <button class="tab" type="button" data-tab="data">Data & Methods</button>
         <button class="tab" type="button" data-tab="exposure">Exposure Lab</button>
         <button class="tab" type="button" data-tab="khi">KHI Lab</button>
         <button class="tab" type="button" data-tab="scenario">Scenario</button>
+        <button class="tab" type="button" data-tab="gis">GIS Evidence</button>
         <button class="tab" type="button" data-tab="outputs">Outputs</button>
       </nav>
 
@@ -176,7 +189,7 @@
         </article>
         <article class="metric-card">
           <span class="metric-label">Within Buffer</span>
-          <strong id="metricExposed">380</strong>
+          <strong id="metricExposed">455</strong>
           <span class="metric-note" id="metricBufferNote">within 1000 m</span>
         </article>
         <article class="metric-card">
@@ -298,6 +311,51 @@
           </div>
         </section>
 
+        <section class="tab-view" data-view="animation">
+          <div class="two-col">
+            <article class="panel wide">
+              <p class="eyebrow">Cinematic model layer</p>
+              <h2>The animation turns the static CATModel into a visible hazard-exposure field.</h2>
+              <p>
+                The full-width motion field above is intentionally lightweight canvas code:
+                it loads after the page shell, respects reduced-motion settings, and uses
+                the same county selection and buffer threshold as the dashboard controls.
+              </p>
+              <div class="question-grid">
+                <div><strong>Particles</strong><span>mapped karst concentration and local density</span></div>
+                <div><strong>Rings</strong><span>screening buffers around facility exposure</span></div>
+                <div><strong>Signals</strong><span>critical-facility locations animated as pulse points</span></div>
+                <div><strong>Purpose</strong><span>presentation impact without changing the underlying math</span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-view" data-view="gallery">
+          <div class="field-gallery in-tab">
+            <div class="gallery-intro">
+              <p class="eyebrow">Field photo gallery</p>
+              <h2>Real karst processes behind the screening layer.</h2>
+              <p>
+                USGS field imagery helps connect the mapped inventory to actual mechanisms:
+                collapse, rapid drainage, and hydrologic routing through soluble rock terrain.
+              </p>
+            </div>
+            <figure class="photo-card">
+              <img src="https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/wss-banner-sinkhole.jpg" alt="Large sinkhole cutting through a roadway" loading="lazy">
+              <figcaption><b>Surface collapse</b><span>Roadway-scale sinkhole disruption.</span></figcaption>
+            </figure>
+            <figure class="photo-card">
+              <img src="https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/dyeTrace1-VR.jpg" alt="Water entering a sinkhole during dye tracing" loading="lazy">
+              <figcaption><b>Subsurface connection</b><span>Dye tracing and drainage pathways.</span></figcaption>
+            </figure>
+            <figure class="photo-card">
+              <img src="https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/AlapahaRiver2002.jpg" alt="River water flowing into a sinkhole" loading="lazy">
+              <figcaption><b>Hydrologic trigger</b><span>Water routing through karst terrain.</span></figcaption>
+            </figure>
+          </div>
+        </section>
+
         <section class="tab-view" data-view="literature">
           <div class="literature-grid">
             <article class="panel">
@@ -352,14 +410,14 @@
                 <div><b>DCNR_PAKarst.dbf</b><span>lat, lon, karst type</span></div>
                 <div><b>karst_study_area.csv</b><span>filtered to Lehigh, Berks, Bucks, Montgomery, Chester</span></div>
                 <div><b>PA DOH hospitals</b><span>42 real hospital points in the study area</span></div>
-                <div><b>USGS essential structures</b><span>1,675 clipped essential facilities used for exposure screening</span></div>
+                <div><b>USGS essential structures</b><span>1,675 real school, fire/EMS, police, and correctional structure points used for exposure screening</span></div>
                 <div><b>PennDOT municipalities</b><span>287 real municipality polygons used for KHI ranking</span></div>
                 <div><b>Final result tables</b><span>distance buffers, hospital nearest-karst table, county exposure, KHI, sensitivity, and loss proxy</span></div>
               </div>
               <p class="note-box">
-                The website is keyed to the final PDF/PPT results supplied for the project. Where source
-                artifacts had minor internal count conflicts, the dashboard uses the reconciled final-deck
-                facility total: 42 hospitals + 1,675 USGS essential structures = 1,717 facilities.
+                The website is keyed to regenerated real-data outputs. County and municipality assignment
+                use polygon boundaries when the PennDOT files are present; otherwise the Python pipeline
+                labels fallback runs as screening-grade.
               </p>
             </article>
 
@@ -367,10 +425,16 @@
               <p class="eyebrow">Model formula</p>
               <h2>KHI = 100 x (wH H + wE E + wC C)</h2>
               <div class="formula-stack">
-                <div><b>H</b><span>normalized mapped-karst count per cell</span></div>
-                <div><b>E</b><span>normalized exposed-facility count per cell</span></div>
-                <div><b>C</b><span>normalized criticality-weighted exposure per cell</span></div>
+                <div><b>H</b><span>min-max normalized municipal karst density</span></div>
+                <div><b>E</b><span>min-max normalized exposed-facility count within 500 m</span></div>
+                <div><b>C</b><span>min-max normalized criticality-weighted exposure</span></div>
               </div>
+            </article>
+
+            <article class="panel wide">
+              <p class="eyebrow">Data inventory</p>
+              <h2>Audit status before final outputs</h2>
+              <div id="inventoryTable" class="table-wrap" aria-label="Project data inventory audit"></div>
             </article>
 
             <article class="panel wide">
@@ -458,10 +522,12 @@
               <p class="eyebrow">Interpretation</p>
               <h2>Stable high ranks are stronger screening targets.</h2>
               <p>
-                Cells that stay near the top under base, hazard-led, and exposure-led weights
-                are more robust priorities. Cells that move sharply are useful uncertainty
-                flags because their priority depends on which CATModel dimension is emphasized.
+                Municipalities that stay near the top under base, hazard-led, exposure-led,
+                and critical-facility weights are more robust screening priorities. Large
+                rank movement is a useful uncertainty flag because priority depends on which
+                CATModel dimension is emphasized.
               </p>
+              <div id="correlationPanel" class="correlation-grid" aria-label="Spearman rank correlations"></div>
               <div id="sensitivityTable" class="table-wrap" aria-label="KHI rank sensitivity table"></div>
             </article>
           </div>
@@ -494,6 +560,32 @@
           </div>
         </section>
 
+        <section class="tab-view" data-view="gis">
+          <div class="gis-evidence in-tab">
+            <div class="panel evidence-intro">
+              <p class="eyebrow">GIS evidence</p>
+              <h2>Preprocessing artifacts supporting the final CATModel.</h2>
+              <p>
+                The project record includes ArcGIS clipping evidence and two exported map
+                layouts. These visuals are preserved because they show the actual GIS workflow
+                behind the Python/Vercel packaging.
+              </p>
+            </div>
+            <figure class="evidence-card evidence-wide">
+              <img src="./assets/arcgis-clip-workflow.png" alt="ArcGIS Pro geoprocessing clip workflow screenshot" loading="lazy">
+              <figcaption><b>Clip workflow</b><span>ArcGIS Pro geoprocessing evidence.</span></figcaption>
+            </figure>
+            <figure class="evidence-card">
+              <img src="./assets/county-exposure-layout.png" alt="County map layout showing mapped karst hazard proxy" loading="lazy">
+              <figcaption><b>County layout</b><span>Five-county hazard proxy map.</span></figcaption>
+            </figure>
+            <figure class="evidence-card">
+              <img src="./assets/karst-density-layout.png" alt="Kernel density map layout of mapped karst features" loading="lazy">
+              <figcaption><b>Density layout</b><span>Kernel density communication layer.</span></figcaption>
+            </figure>
+          </div>
+        </section>
+
         <section class="tab-view" data-view="outputs">
           <div class="outputs-grid">
             <article class="panel">
@@ -502,10 +594,17 @@
               <div class="artifact-list">
                 <a href="https://github.com/noyo12394/pa-karst-catmodel" target="_blank" rel="noreferrer">GitHub repository</a>
                 <a href="https://github.com/noyo12394/pa-karst-catmodel/blob/main/docs/final-results-brief.md" target="_blank" rel="noreferrer">Final results brief</a>
+                <a href="https://github.com/noyo12394/pa-karst-catmodel/blob/main/docs/project-audit.md" target="_blank" rel="noreferrer">Project audit</a>
+                <a href="./downloads/PA_Karst_Final_Presentation.pptx">Final PowerPoint deck</a>
+                <a href="./downloads/table1_exposure_by_buffer.csv">Table 1 exposure CSV</a>
+                <a href="./downloads/table2_top10_facilities.csv">Table 2 top facilities CSV</a>
+                <a href="./downloads/table3_county_summary.csv">Table 3 county summary CSV</a>
+                <a href="./downloads/table4_top15_munis_KHI.csv">Table 4 KHI CSV</a>
+                <a href="./downloads/table5_sensitivity.csv">Table 5 sensitivity CSV</a>
+                <a href="./downloads/table6_loss_proxy.csv">Table 6 loss proxy CSV</a>
                 <span>Python CATModel pipeline</span>
-                <span>CSV result tables</span>
                 <span>Matplotlib figures</span>
-                <span>10-slide PowerPoint generator</span>
+                <span>15-slide PowerPoint generator</span>
                 <span>Vercel dashboard</span>
               </div>
             </article>

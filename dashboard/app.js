@@ -15,13 +15,14 @@ const STUDY_TOTALS = {
   structures: 1675,
   facilities: 1717,
   municipalities: 287,
-  exposed1km: 380,
+  exposed1km: 455,
 };
 
 const schemes = {
   Base: [0.4, 0.4, 0.2],
   "Hazard-led": [0.6, 0.25, 0.15],
   "Exposure-led": [0.25, 0.6, 0.15],
+  "Critical-facility": [0.3, 0.35, 0.35],
 };
 
 const counties = [
@@ -36,7 +37,7 @@ const counties = [
     hospitals: 7,
     exposed1km: 158,
     hospitalExposed: 5,
-    loss: 11.65,
+    loss: 11.365,
   },
   {
     name: "Lehigh",
@@ -47,48 +48,48 @@ const counties = [
     density: 11.24,
     facilities: 215,
     hospitals: 5,
-    exposed1km: 116,
-    hospitalExposed: 3,
-    loss: 9.6,
+    exposed1km: 176,
+    hospitalExposed: 4,
+    loss: 16.754,
   },
   {
     name: "Chester",
     bbox: [-76.058, 39.72, -75.42, 40.262],
     area: 1967.7,
     pop: 545823,
-    karst: 2536,
+    karst: 2549,
     density: 1.29,
     facilities: 331,
     hospitals: 7,
     exposed1km: 63,
     hospitalExposed: 2,
-    loss: 4.03,
+    loss: 4.077,
   },
   {
     name: "Bucks",
     bbox: [-75.477, 40.118, -74.694, 40.609],
     area: 1611.2,
     pop: 646538,
-    karst: 636,
-    density: 0.39,
+    karst: 1001,
+    density: 0.62,
     facilities: 371,
     hospitals: 8,
-    exposed1km: 3,
+    exposed1km: 11,
     hospitalExposed: 0,
-    loss: 0.39,
+    loss: 0.774,
   },
   {
     name: "Montgomery",
     bbox: [-75.694, 40.08, -75.09, 40.451],
     area: 1262.4,
     pop: 856553,
-    karst: 354,
-    density: 0.28,
+    karst: 641,
+    density: 0.51,
     facilities: 499,
     hospitals: 15,
     exposed1km: 40,
     hospitalExposed: 1,
-    loss: 1.82,
+    loss: 2.22,
   },
 ];
 
@@ -100,10 +101,10 @@ const facilityTypes = [
 ];
 
 const exposureByTypeRing = {
-  hospital: { "100": 2, "250": 2, "500": 5, "1000": 2 },
-  fire_ems: { "100": 13, "250": 23, "500": 36, "1000": 34 },
-  police: { "100": 1, "250": 7, "500": 12, "1000": 23 },
-  school: { "100": 56, "250": 62, "500": 54, "1000": 48 },
+  hospital: { "100": 2, "250": 3, "500": 5, "1000": 2 },
+  fire_ems: { "100": 15, "250": 30, "500": 42, "1000": 34 },
+  police: { "100": 5, "250": 11, "500": 17, "1000": 18 },
+  school: { "100": 72, "250": 84, "500": 66, "1000": 49 },
 };
 
 const hospitals = [
@@ -111,31 +112,50 @@ const hospitals = [
   ["Tower Behavioral Health", "Berks", "Reading", 72],
   ["Surgical Institute of Reading", "Berks", "Wyomissing", 111],
   ["Good Shepherd Specialty Hospital", "Lehigh", "Bethlehem", 130],
+  ["St. Luke's Hospital Bethlehem", "Lehigh", "Bethlehem", 181],
   ["Wernersville State Hospital", "Berks", "Wernersville", 273],
-  ["St. Luke's Hospital Bethlehem", "Lehigh", "Bethlehem", 294],
   ["Saint John Vianney Hospital", "Chester", "Downingtown", 303],
   ["Penn State Health St. Joseph", "Berks", "Reading", 333],
+  ["Good Shepherd Rehabilitation Hospital", "Lehigh", "Allentown", 434],
   ["VETERANS AFFAIRS MEDICAL CENTER COATESVILLE", "Chester", "Coatesville", 442],
   ["Reading Hospital", "Berks", "West Reading", 837],
   ["Holy Redeemer Hospital", "Montgomery", "Meadowbrook", 875],
 ];
 
 const khiRows = [
-  { label: "Allentown", county: "Lehigh", karst: 349, exposed: 45, base: 64.4, ranks: [1, 6, 1] },
-  { label: "Hanover", county: "Lehigh", karst: 787, exposed: 5, base: 48.0, ranks: [2, 1, 3] },
-  { label: "Maxatawny", county: "Berks", karst: 3407, exposed: 6, base: 38.3, ranks: [3, 5, 4] },
-  { label: "Lyons", county: "Berks", karst: 58, exposed: 2, base: 36.6, ranks: [4, 2, 11] },
-  { label: "Whitehall", county: "Lehigh", karst: 346, exposed: 18, base: 34.8, ranks: [5, 17, 2] },
-  { label: "Lower Macungie", county: "Lehigh", karst: 2016, exposed: 0, base: 33.9, ranks: [6, 3, 14] },
-  { label: "Richmond", county: "Berks", karst: 2462, exposed: 6, base: 33.8, ranks: [7, 9, 7] },
-  { label: "Macungie", county: "Lehigh", karst: 117, exposed: 0, base: 33.5, ranks: [8, 4, 15] },
-  { label: "Riegelsville", county: "Bucks", karst: 65, exposed: 1, base: 31.4, ranks: [9, 7, 20] },
-  { label: "Ontelaunee", county: "Berks", karst: 981, exposed: 4, base: 30.6, ranks: [10, 10, 12] },
-  { label: "South Whitehall", county: "Lehigh", karst: 1248, exposed: 7, base: 30.2, ranks: [11, 11, 10] },
-  { label: "Upper Macungie", county: "Lehigh", karst: 2990, exposed: 0, base: 28.8, ranks: [12, 8, 24] },
-  { label: "Muhlenberg", county: "Berks", karst: 688, exposed: 10, base: 26.9, ranks: [13, 18, 9] },
-  { label: "Topton", county: "Berks", karst: 70, exposed: 2, base: 26.3, ranks: [14, 12, 23] },
-  { label: "Fleetwood", county: "Berks", karst: 59, exposed: 5, base: 26.1, ranks: [15, 13, 19] },
+  { label: "Allentown", county: "Lehigh", karst: 349, exposed: 51, base: 64.36, ranks: [1, 7, 1, 1], hNorm: 0.109, eNorm: 1, cNorm: 1, scores: { Base: 64.36, "Hazard-led": 46.54, "Exposure-led": 77.73, "Critical-facility": 73.27 } },
+  { label: "Lower Macungie", county: "Lehigh", karst: 2016, exposed: 10, base: 46.41, ranks: [2, 2, 2, 2], hNorm: 0.835, eNorm: 0.196, cNorm: 0.258, scores: { Base: 46.41, "Hazard-led": 58.89, "Exposure-led": 36.52, "Critical-facility": 40.95 } },
+  { label: "Hanover", county: "Lehigh", karst: 787, exposed: 5, base: 46.32, ranks: [3, 1, 4, 3], hNorm: 1, eNorm: 0.098, cNorm: 0.12, scores: { Base: 46.32, "Hazard-led": 64.25, "Exposure-led": 32.68, "Critical-facility": 37.64 } },
+  { label: "South Whitehall", county: "Lehigh", karst: 1248, exposed: 16, base: 38.84, ranks: [4, 9, 3, 4], hNorm: 0.513, eNorm: 0.314, cNorm: 0.288, scores: { Base: 38.84, "Hazard-led": 42.96, "Exposure-led": 35.98, "Critical-facility": 36.46 } },
+  { label: "Upper Macungie", county: "Lehigh", karst: 2990, exposed: 7, base: 37.54, ranks: [5, 6, 6, 5], hNorm: 0.712, eNorm: 0.137, cNorm: 0.178, scores: { Base: 37.54, "Hazard-led": 48.84, "Exposure-led": 28.71, "Critical-facility": 32.39 } },
+  { label: "Maxatawny", county: "Berks", karst: 3407, exposed: 6, base: 36.52, ranks: [6, 5, 7, 6], hNorm: 0.738, eNorm: 0.118, cNorm: 0.115, scores: { Base: 36.52, "Hazard-led": 48.94, "Exposure-led": 27.23, "Critical-facility": 30.28 } },
+  { label: "Lyons", county: "Berks", karst: 58, exposed: 2, base: 35.82, ranks: [7, 3, 9, 8], hNorm: 0.829, eNorm: 0.039, cNorm: 0.055, scores: { Base: 35.82, "Hazard-led": 51.54, "Exposure-led": 23.9, "Critical-facility": 28.16 } },
+  { label: "Macungie", county: "Lehigh", karst: 117, exposed: 1, base: 34.64, ranks: [8, 4, 11, 10], hNorm: 0.836, eNorm: 0.02, cNorm: 0.02, scores: { Base: 34.64, "Hazard-led": 50.97, "Exposure-led": 22.39, "Critical-facility": 26.49 } },
+  { label: "Richmond", county: "Berks", karst: 2462, exposed: 6, base: 31.63, ranks: [9, 10, 8, 9], hNorm: 0.589, eNorm: 0.118, cNorm: 0.168, scores: { Base: 31.63, "Hazard-led": 40.8, "Exposure-led": 24.3, "Critical-facility": 27.67 } },
+  { label: "Riegelsville", county: "Bucks", karst: 65, exposed: 1, base: 31.01, ranks: [10, 8, 16, 12], hNorm: 0.743, eNorm: 0.02, cNorm: 0.025, scores: { Base: 31.01, "Hazard-led": 45.46, "Exposure-led": 20.13, "Critical-facility": 23.85 } },
+  { label: "Ontelaunee", county: "Berks", karst: 981, exposed: 4, base: 29.21, ranks: [11, 11, 14, 11], hNorm: 0.603, eNorm: 0.078, cNorm: 0.098, scores: { Base: 29.21, "Hazard-led": 39.61, "Exposure-led": 21.25, "Critical-facility": 24.25 } },
+  { label: "Whitehall", county: "Lehigh", karst: 346, exposed: 16, base: 27.77, ranks: [12, 19, 5, 7], hNorm: 0.198, eNorm: 0.314, cNorm: 0.365, scores: { Base: 27.77, "Hazard-led": 25.2, "Exposure-led": 29.25, "Critical-facility": 29.71 } },
+  { label: "Topton", county: "Berks", karst: 70, exposed: 2, base: 25.54, ranks: [13, 12, 20, 17], hNorm: 0.572, eNorm: 0.039, cNorm: 0.055, scores: { Base: 25.54, "Hazard-led": 36.11, "Exposure-led": 17.47, "Critical-facility": 20.45 } },
+  { label: "Fleetwood", county: "Berks", karst: 59, exposed: 4, base: 24.05, ranks: [14, 14, 19, 18], hNorm: 0.482, eNorm: 0.078, cNorm: 0.082, scores: { Base: 24.05, "Hazard-led": 32.1, "Exposure-led": 17.98, "Critical-facility": 20.06 } },
+  { label: "Maidencreek", county: "Berks", karst: 1175, exposed: 3, base: 23.36, ranks: [15, 13, 23, 21], hNorm: 0.501, eNorm: 0.059, cNorm: 0.047, scores: { Base: 23.36, "Hazard-led": 32.27, "Exposure-led": 16.78, "Critical-facility": 18.76 } },
+];
+
+const sensitivityCorrelations = [
+  ["Base vs Hazard-led", 0.957],
+  ["Base vs Exposure-led", 0.944],
+  ["Base vs Critical-facility", 0.969],
+  ["Hazard-led vs Exposure-led", 0.832],
+];
+
+const inventoryRows = [
+  ["DCNR_PAKarst.dbf", "Statewide mapped karst point inventory", "current / real", "Parsed directly from DBF; 144,245 statewide records."],
+  ["PaCounty2026_01.zip", "County boundary polygons and area", "current / real", "Web Mercator polygons converted to lon/lat for assignment."],
+  ["PaMunicipalities2026_01.zip", "Municipality boundary polygons", "current / real", "287 study-area polygons used for KHI aggregation."],
+  ["DOH_Hospitals202511.zip", "Hospital point inventory", "current / real", "42 study-area hospital records with published coordinates."],
+  ["Struct_Point.shp/dbf", "USGS structure points", "current / real", "1,675 mapped school, fire/EMS, police, and correctional records."],
+  ["Facility fallback generator", "Synthetic backup if source files are absent", "fallback only", "Outputs are labeled screening-grade when raw facility files are missing."],
+  ["GIS layout PDFs/screenshots", "ArcGIS evidence and presentation assets", "current / evidence", "Used as visual proof of preprocessing and map design."],
+  ["PPTX / dashboard / brief", "Final communication artifacts", "current", "Synced to regenerated table outputs in this final pass."],
 ];
 
 let selectedCounty = "All";
@@ -226,18 +246,9 @@ function currentWeights() {
 }
 
 function derivedKhi(row) {
-  if (selectedScheme === "Base") return row.base;
-  if (selectedScheme === "Hazard-led") {
-    return Math.max(0, row.base + (row.ranks[0] - row.ranks[1]) * 1.2);
-  }
-  if (selectedScheme === "Exposure-led") {
-    return Math.max(0, row.base + (row.ranks[0] - row.ranks[2]) * 1.2);
-  }
+  if (row.scores?.[selectedScheme] !== undefined) return row.scores[selectedScheme];
   const [h, e, c] = currentWeights();
-  const hNorm = row.karst / 3407;
-  const eNorm = row.exposed / 45;
-  const cNorm = Math.min(1, 0.6 * eNorm + 0.4 * (row.base / 64.4));
-  return 100 * (h * hNorm + e * eNorm + c * cNorm);
+  return 100 * (h * row.hNorm + e * row.eNorm + c * row.cNorm);
 }
 
 function svgEl(tag, attrs = {}, children = []) {
@@ -412,8 +423,10 @@ function renderMap() {
 
     const cx = x + w * 0.58;
     const cy = y + h * 0.56;
-    const hazardR = 10 + (county.density / 11.24) * 34;
-    const exposureR = 7 + (exposure / 158) * 24;
+    const maxDensity = Math.max(...counties.map((item) => item.density));
+    const maxExposure = Math.max(...counties.map((item) => item.exposed1km));
+    const hazardR = 10 + (county.density / maxDensity) * 34;
+    const exposureR = 7 + (exposure / maxExposure) * 24;
     svg.appendChild(
       svgEl("circle", {
         cx,
@@ -654,15 +667,42 @@ function renderSensitivityTable() {
   target.innerHTML = `
     <table class="data-table">
       <thead>
-        <tr><th>Municipality</th><th>County</th><th>Base</th><th>Hazard-led</th><th>Exposure-led</th><th>Max change</th></tr>
+        <tr><th>Municipality</th><th>County</th><th>Base</th><th>Hazard-led</th><th>Exposure-led</th><th>Critical</th><th>Max change</th></tr>
       </thead>
       <tbody>
         ${khiRows
           .slice(0, 15)
           .map((row) => {
             const maxDelta = Math.max(...row.ranks) - Math.min(...row.ranks);
-            return `<tr><td>${row.label}</td><td>${row.county}</td><td>${row.ranks[0]}</td><td>${row.ranks[1]}</td><td>${row.ranks[2]}</td><td><strong>${maxDelta}</strong></td></tr>`;
+            return `<tr><td>${row.label}</td><td>${row.county}</td><td>${row.ranks[0]}</td><td>${row.ranks[1]}</td><td>${row.ranks[2]}</td><td>${row.ranks[3]}</td><td><strong>${maxDelta}</strong></td></tr>`;
           })
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+  const correlations = document.querySelector("#correlationPanel");
+  if (correlations) {
+    correlations.innerHTML = sensitivityCorrelations
+      .map(([label, value]) => `<div><b>${value.toFixed(3)}</b><span>${label}</span></div>`)
+      .join("");
+  }
+}
+
+function renderInventoryTable() {
+  const target = document.querySelector("#inventoryTable");
+  if (!target) return;
+  target.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr><th>File</th><th>Purpose</th><th>Status</th><th>Gap / note</th></tr>
+      </thead>
+      <tbody>
+        ${inventoryRows
+          .map(
+            ([file, purpose, status, gap]) =>
+              `<tr><td><strong>${file}</strong></td><td>${purpose}</td><td>${status}</td><td>${gap}</td></tr>`
+          )
           .join("")}
       </tbody>
     </table>
@@ -748,6 +788,7 @@ function renderAll() {
   renderExposureNarrative();
   renderHospitalTable();
   renderSensitivityTable();
+  renderInventoryTable();
   renderScenario();
 }
 

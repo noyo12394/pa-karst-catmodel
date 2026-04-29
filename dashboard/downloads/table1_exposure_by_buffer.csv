@@ -1,0 +1,6 @@
+buffer_zone,fire_ems,hospital,police,school,total
+100m,15,2,5,72,94
+250m,30,3,11,84,128
+500m,42,5,17,66,130
+1000m,34,2,18,49,103
+outside,314,30,153,765,1262

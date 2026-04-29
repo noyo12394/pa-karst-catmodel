@@ -20,4 +20,7 @@ outputs/presentation/*
 !outputs/presentation/.gitkeep
 *.pptx
 *.pdf
+!dashboard/downloads/*.pptx
+!dashboard/downloads/*.csv
+!dashboard/downloads/*.md
 !project-assets/gis/*.pdf

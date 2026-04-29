@@ -1,0 +1,16 @@
+label,county,KHI_Base,rank_Base,rank_Hazard-led,rank_Exposure-led,rank_Critical-facility,delta_Hazard-led,delta_Exposure-led,delta_Critical-facility
+Allentown,Lehigh,64.36,1,7,1,1,6,0,0
+Lower Macungie,Lehigh,46.41,2,2,2,2,0,0,0
+Hanover,Lehigh,46.32,3,1,4,3,-2,1,0
+South Whitehall,Lehigh,38.84,4,9,3,4,5,-1,0
+Upper Macungie,Lehigh,37.54,5,6,6,5,1,1,0
+Maxatawny,Berks,36.52,6,5,7,6,-1,1,0
+Lyons,Berks,35.82,7,3,9,8,-4,2,1
+Macungie,Lehigh,34.64,8,4,11,10,-4,3,2
+Richmond,Berks,31.63,9,10,8,9,1,-1,0
+Riegelsville,Bucks,31.01,10,8,16,12,-2,6,2
+Ontelaunee,Berks,29.21,11,11,14,11,0,3,0
+Whitehall,Lehigh,27.77,12,19,5,7,7,-7,-5
+Topton,Berks,25.54,13,12,20,17,-1,7,4
+Fleetwood,Berks,24.05,14,14,19,18,0,5,4
+Maidencreek,Berks,23.36,15,13,23,21,-2,8,6

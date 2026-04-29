@@ -1,0 +1,7 @@
+scheme_pair,spearman_top50
+Base vs Hazard-led,0.957
+Base vs Exposure-led,0.944
+Base vs Critical-facility,0.969
+Hazard-led vs Exposure-led,0.832
+Hazard-led vs Critical-facility,0.874
+Exposure-led vs Critical-facility,0.991

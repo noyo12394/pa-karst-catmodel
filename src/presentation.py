@@ -107,22 +107,27 @@ def add_multi_text(
 
 
 def build_presentation(out_path: Path) -> Path:
-    """Build and save the 10-slide final project presentation."""
+    """Build and save the final 15-slide project presentation."""
     prs = Presentation()
     prs.slide_width = Inches(WIDE_WIDTH)
     prs.slide_height = Inches(WIDE_HEIGHT)
     blank = prs.slide_layouts[6]
 
     _slide_cover(prs, blank)
-    _slide_intro(prs, blank, 2)
-    _slide_method1(prs, blank, 3)
-    _slide_method2(prs, blank, 4)
-    _slide_workflow(prs, blank, 5)
-    _slide_result1(prs, blank, 6)
-    _slide_result2(prs, blank, 7)
-    _slide_result3(prs, blank, 8)
-    _slide_result4(prs, blank, 9)
-    _slide_conclusion(prs, blank, 10)
+    _slide_motivation(prs, blank, 2)
+    _slide_study_area(prs, blank, 3)
+    _slide_literature(prs, blank, 4)
+    _slide_data_sources(prs, blank, 5)
+    _slide_method1(prs, blank, 6)
+    _slide_method2(prs, blank, 7)
+    _slide_workflow(prs, blank, 8)
+    _slide_result1(prs, blank, 9)
+    _slide_result2(prs, blank, 10)
+    _slide_result3(prs, blank, 11)
+    _slide_result4(prs, blank, 12)
+    _slide_gis_evidence(prs, blank, 13)
+    _slide_limitations(prs, blank, 14)
+    _slide_recommendations(prs, blank, 15)
 
     out_path = OUT_PRESENTATION / "PA_Karst_Final_Presentation.pptx" if out_path is None else out_path
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,6 +155,147 @@ def _slide_cover(prs: Presentation, blank: Any) -> None:
     add_text(slide, 0.85, 4.25, 5.8, 0.35, "Essential-facility exposure in southeastern Pennsylvania", 18, False, SAND)
     add_text(slide, 0.85, 5.0, 5.8, 0.35, "Lehigh University CAT402/CEE332 Final Project", 15, False, SAGE)
     add_text(slide, 0.85, 5.43, 5.8, 0.35, "Prepared by: N. Chatterjee", 15, False, SAGE)
+    _notes(
+        slide,
+        "This presentation is the final package for the PA Karst Hazard CATModel. "
+        "The project asks how mapped karst susceptibility overlaps essential facilities in five southeastern Pennsylvania counties. "
+        "I frame the result as a screening model, not a parcel-level sinkhole prediction. "
+        "The key deliverables are a reproducible Python pipeline, result tables, figures, this deck, and a Vercel project dashboard.",
+    )
+
+
+def _slide_motivation(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Motivation", page)
+    add_text(slide, 0.8, 1.15, 6.0, 0.6, "Karst is a quiet hazard until infrastructure sits on top of it.", 26, True, TERRACOTTA)
+    add_multi_text(
+        slide,
+        0.9,
+        2.05,
+        5.8,
+        3.7,
+        [
+            ("Sinkholes and subsidence are spatially localized, often hydrologically triggered, and hard to convert into event probabilities at classroom-project scale.", 18, False, DARK, False, 12),
+            ("A useful final project therefore needs a defensible screening model: map susceptibility, intersect essential facilities, and identify where follow-up engineering review would be most valuable.", 18, False, DARK, False, 12),
+            ("The CATModel contribution is the explicit hazard-exposure-criticality framing and sensitivity testing.", 18, False, DARK, False, 0),
+        ],
+    )
+    add_rect(slide, 7.4, 1.25, 4.7, 4.85, SAND, TERRACOTTA)
+    add_text(slide, 7.8, 1.75, 3.9, 0.5, "Decision question", 22, True, DARK, "center")
+    add_text(
+        slide,
+        7.85,
+        2.65,
+        3.8,
+        2.3,
+        "Where do mapped karst susceptibility and essential-facility exposure overlap strongly enough to justify deeper review?",
+        21,
+        True,
+        TERRACOTTA,
+        "center",
+        "middle",
+    )
+    _notes(
+        slide,
+        "I start with the motivation because karst is not like a hurricane track or an earthquake rupture. "
+        "The timing of a sinkhole at a specific parcel is difficult to defend from public map data alone. "
+        "So the project deliberately becomes a screening model. "
+        "The useful question is where mapped susceptibility and important facilities overlap enough to prioritize a closer look.",
+    )
+
+
+def _slide_study_area(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Study Area", page)
+    stats = [
+        ("5", "counties"),
+        ("30,623", "study-area karst features"),
+        ("1,717", "real facilities"),
+        ("455", "facilities within 1 km"),
+    ]
+    for idx, (value, label) in enumerate(stats):
+        x = 0.7 + idx * 3.12
+        add_rect(slide, x, 1.15, 2.7, 1.18, SAND, TERRACOTTA)
+        add_text(slide, x + 0.15, 1.33, 2.4, 0.4, value, 27, True, TERRACOTTA, "center")
+        add_text(slide, x + 0.18, 1.82, 2.32, 0.32, label, 12, False, DARK, "center")
+    summary = _read_table(OUT_TABLES / "table3_county_summary.csv")
+    add_text(slide, 0.85, 2.8, 5.8, 0.42, "County exposure profile", 22, True, TERRACOTTA)
+    add_text(slide, 0.95, 3.35, 5.5, 2.7, _county_summary_text(summary), 15, False, DARK)
+    add_text(slide, 7.15, 2.85, 4.9, 0.42, "Spatial pattern", 22, True, TERRACOTTA)
+    add_multi_text(
+        slide,
+        7.25,
+        3.4,
+        4.65,
+        2.5,
+        [
+            ("Lehigh has the highest mapped karst density at 11.24 features/km2.", 16, False, DARK, False, 10),
+            ("Berks has the largest mapped feature count at 16,294.", 16, False, DARK, False, 10),
+            ("Bucks and Montgomery have many facilities but lower mapped karst densities.", 16, False, DARK, False, 0),
+        ],
+    )
+    _notes(
+        slide,
+        "The study area is five counties in southeastern Pennsylvania. "
+        "The regenerated pipeline finds 30,623 mapped karst features inside the county polygons. "
+        "It links those hazards to 1,717 real facility points from DOH and USGS data. "
+        "The key result is that 455 facilities fall within one kilometer of a mapped karst point.",
+    )
+
+
+def _slide_literature(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Literature Context", page)
+    rows = [
+        ("IPCC 2014", "Risk as interaction of hazard, exposure, and vulnerability."),
+        ("Wood et al. 2023, USGS", "National-scale sinkhole susceptibility and exposure framing."),
+        ("Reese & Kochanov, PAGS", "Pennsylvania karst and sinkhole engineering-geology context."),
+        ("Galve et al. / Engineering Geology", "Sinkhole susceptibility and risk mapping precedent."),
+        ("Qiu, Wu & Chen 2020", "GIS and imagery-derived sinkhole susceptibility attributes."),
+    ]
+    for idx, (source, role) in enumerate(rows):
+        y = 1.25 + idx * 0.9
+        add_rect(slide, 0.8, y, 2.7, 0.62, SAND, TERRACOTTA)
+        add_text(slide, 0.95, y + 0.16, 2.4, 0.25, source, 12, True, DARK, "center")
+        add_text(slide, 3.75, y + 0.1, 8.3, 0.38, role, 15, False, DARK)
+    add_text(slide, 0.85, 6.2, 11.2, 0.35, "Takeaway: this project is a transparent screening model, not a calibrated event-probability model.", 16, True, TERRACOTTA, "center")
+    _notes(
+        slide,
+        "The literature gives the project its boundaries. "
+        "IPCC provides the risk framing, while Wood and colleagues show how sinkhole susceptibility can be handled at broad scale. "
+        "Pennsylvania Geological Survey materials keep the model grounded in local karst behavior. "
+        "The susceptibility mapping literature supports the idea that a map-based screen is useful but should not be oversold as prediction.",
+    )
+
+
+def _slide_data_sources(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Data Sources", page)
+    rows = [
+        ("DCNR / PASDA karst DBF", "144,245 statewide points; 30,623 in study counties"),
+        ("PA DOH hospitals", "42 hospital points in the five-county study area"),
+        ("USGS Structures", "1,675 school, fire/EMS, police, and correctional points"),
+        ("PennDOT counties", "5 study county polygons and area values"),
+        ("PennDOT municipalities", "287 municipal polygons for KHI aggregation"),
+    ]
+    for idx, (name, note) in enumerate(rows):
+        y = 1.15 + idx * 0.86
+        add_text(slide, 0.9, y, 3.8, 0.32, name, 15, True, TERRACOTTA)
+        add_text(slide, 4.85, y, 7.0, 0.32, note, 15, False, DARK)
+        add_rect(slide, 0.85, y + 0.46, 11.35, 0.02, SAND)
+    add_multi_text(
+        slide,
+        0.9,
+        5.75,
+        11.1,
+        0.9,
+        [
+            ("Implementation note: shapefiles are parsed with pure Python readers, Web Mercator boundaries are converted to lon/lat, and the pipeline falls back to fixed-seed synthetic facilities only when real facility files are absent.", 14, False, DARK, False, 0),
+        ],
+    )
+    _notes(
+        slide,
+        "This slide is the reproducibility promise. "
+        "The model uses public point inventories and PennDOT polygons rather than hand-entered locations. "
+        "The karst DBF is parsed directly, and county and municipality polygons are used for assignment. "
+        "If a clean clone only has the karst DBF, the code still runs but labels facility outputs as screening-grade synthetic.",
+    )
 
 
 def _slide_intro(prs: Presentation, blank: Any, page: int) -> None:
@@ -189,14 +335,22 @@ def _slide_method1(prs: Presentation, blank: Any, page: int) -> None:
         4.25,
         [
             ("Mapped karst features are treated as evidence of susceptibility, not as deterministic sinkhole events.", 18, False, DARK, False, 12),
-            ("The model avoids polygon overlay dependencies by assigning records to counties with fixed bounding boxes and performing point-based nearest-neighbor searches.", 18, False, DARK, False, 12),
-            ("This keeps the pipeline reproducible for classroom use while preserving the exposure logic needed for CATModel framing.", 18, False, DARK, False, 0),
+            ("The model keeps installation simple by using pure-Python DBF and shapefile readers instead of GeoPandas.", 18, False, DARK, False, 12),
+            ("County and municipality assignment uses real PennDOT polygons when the boundary archives are available.", 18, False, DARK, False, 12),
+            ("This preserves reproducibility while still supporting CATModel-style exposure and sensitivity analysis.", 18, False, DARK, False, 0),
         ],
     )
     add_rect(slide, 7.0, 1.35, 4.8, 4.4, SAND, TERRACOTTA)
     add_text(slide, 7.35, 1.75, 4.1, 0.55, "Susceptibility layer", 23, True, DARK, "center")
     add_text(slide, 7.35, 2.55, 4.1, 1.75, "DCNR mapped karst points\n+\nfacility proximity buffers", 24, True, TERRACOTTA, "center", "middle")
     add_text(slide, 7.35, 4.85, 4.1, 0.55, "screening, not prediction", 16, False, DARK, "center")
+    _notes(
+        slide,
+        "The first methodology point is language discipline. "
+        "A mapped karst point is evidence of susceptibility, not a timed event. "
+        "The code uses real polygons when present, but it does not claim to model subsurface mechanics. "
+        "This framing lets the results be useful without overstating what public data can prove.",
+    )
 
 
 def _slide_method2(prs: Presentation, blank: Any, page: int) -> None:
@@ -210,8 +364,8 @@ def _slide_method2(prs: Presentation, blank: Any, page: int) -> None:
         5.7,
         2.2,
         [
-            ("H: normalized mapped-karst count", 17, False, DARK, False, 8),
-            ("E: normalized exposed-facility count", 17, False, DARK, False, 8),
+            ("H: normalized municipal karst density", 17, False, DARK, False, 8),
+            ("E: normalized exposed-facility count within 500 m", 17, False, DARK, False, 8),
             ("C: normalized criticality-weighted exposure", 17, False, DARK, False, 0),
         ],
     )
@@ -226,31 +380,40 @@ def _slide_method2(prs: Presentation, blank: Any, page: int) -> None:
             ("Weighting schemes", 21, True, DARK, False, 16),
             ("Base: 0.40 / 0.40 / 0.20", 16, False, DARK, False, 8),
             ("Hazard-led: 0.60 / 0.25 / 0.15", 16, False, DARK, False, 8),
-            ("Exposure-led: 0.25 / 0.60 / 0.15", 16, False, DARK, False, 18),
+            ("Exposure-led: 0.25 / 0.60 / 0.15", 16, False, DARK, False, 8),
+            ("Critical-facility: 0.30 / 0.35 / 0.35", 16, False, DARK, False, 18),
             ("Framing follows IPCC 2014, Wood et al. USGS, and Reese & Kochanov PAGS.", 13, False, DARK, True, 0),
         ],
+    )
+    _notes(
+        slide,
+        "The KHI is deliberately simple and auditable. "
+        "Hazard is normalized municipal karst density, exposure is the count of facilities within 500 meters, and criticality weights facility function and proximity. "
+        "I test four schemes so the ranking is not dependent on a single subjective weighting choice. "
+        "The Spearman correlations later show whether the priority list is stable.",
     )
 
 
 def _slide_workflow(prs: Presentation, blank: Any, page: int) -> None:
-    slide = _content_slide(prs, blank, "Workflow & GIS Evidence", page)
-    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "arcgis-clip-workflow.png", 0.62, 1.12, 6.35, 3.15)
-    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "county-exposure-layout.png", 7.22, 1.12, 2.45, 3.15)
-    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "karst-density-layout.png", 9.88, 1.12, 2.45, 3.15)
+    slide = _content_slide(prs, blank, "Workflow", page)
+    _add_picture_or_placeholder(slide, OUT_FIGURES / "fig7_flowchart.png", 0.75, 1.15, 11.75, 3.95)
     add_multi_text(
         slide,
-        0.72,
-        4.62,
+        0.95,
+        5.35,
         11.75,
-        1.45,
+        0.95,
         [
-            ("GIS workflow proof", 20, True, TERRACOTTA, False, 8),
-            ("The ArcGIS Pro clip screenshot and exported layouts document the preprocessing chain: statewide layers were clipped to the five-county study area, mapped karst was visualized as a hazard proxy, and the density layout supported the final dashboard and PowerPoint interpretation.", 14, False, DARK, False, 0),
+            ("Every step writes an inspectable artifact: processed CSVs, tables, figures, a PowerPoint deck, and a deployable dashboard. The pipeline can be run end to end with python scripts/run_all.py after raw data are placed in data/raw/.", 15, False, DARK, False, 0),
         ],
     )
-    add_text(slide, 0.75, 6.24, 3.4, 0.28, "ArcGIS geoprocessing screenshot", 9, False, DARK)
-    add_text(slide, 7.25, 4.45, 2.35, 0.28, "County hazard proxy", 9, False, DARK, "center")
-    add_text(slide, 9.9, 4.45, 2.35, 0.28, "Kernel density layout", 9, False, DARK, "center")
+    _notes(
+        slide,
+        "The workflow is intentionally linear and reproducible. "
+        "First the karst DBF is parsed and filtered, then facilities are prepared, then exposure distances and buffers are computed. "
+        "The municipality KHI and sensitivity analysis come next, followed by figures, tables, the deck, and the dashboard. "
+        "This matters because every number shown later can be traced back to a generated table.",
+    )
 
 
 def _slide_result1(prs: Presentation, blank: Any, page: int) -> None:
@@ -268,6 +431,13 @@ def _slide_result1(prs: Presentation, blank: Any, page: int) -> None:
             ("The density surface is a screening layer for exposure, not a probability surface.", 17, False, DARK, False, 10),
             ("County bounding boxes provide a simple reproducible geography for the final project.", 17, False, DARK, False, 0),
         ],
+    )
+    _notes(
+        slide,
+        "This figure shows that the hazard proxy is highly clustered. "
+        "The visual concentration is strongest in Lehigh and Berks, which also dominate later exposure results. "
+        "I describe this as density of mapped features, not probability of failure. "
+        "The point is to identify where susceptibility should receive more attention.",
     )
 
 
@@ -287,12 +457,26 @@ def _slide_result2(prs: Presentation, blank: Any, page: int) -> None:
             (text, 16, False, DARK, False, 0),
         ],
     )
+    _notes(
+        slide,
+        "This slide connects the hazard layer to actual facilities. "
+        "The regenerated exposure model finds 455 facilities within one kilometer of mapped karst. "
+        "Lehigh has the highest exposure share, while Berks has a large absolute count. "
+        "The map is useful for screening where asset QA and site review should come first.",
+    )
 
 
 def _slide_result3(prs: Presentation, blank: Any, page: int) -> None:
     slide = _content_slide(prs, blank, "Result III: Facility Risk", page)
     _add_picture_or_placeholder(slide, OUT_FIGURES / "fig5_top10_facilities.png", 0.55, 1.15, 6.25, 5.25)
     _add_picture_or_placeholder(slide, OUT_FIGURES / "fig4_county_summary.png", 6.95, 1.15, 5.8, 5.25)
+    _notes(
+        slide,
+        "The top facility chart ranks individual records by local density, proximity, and criticality. "
+        "Schools and fire facilities can appear high because they are numerous and sometimes sit directly on dense mapped clusters. "
+        "The county summary adds scale so we do not overinterpret one facility at a time. "
+        "Together these two views show both asset-level and county-level priorities.",
+    )
 
 
 def _slide_result4(prs: Presentation, blank: Any, page: int) -> None:
@@ -311,6 +495,97 @@ def _slide_result4(prs: Presentation, blank: Any, page: int) -> None:
             ("Uncertainty", 18, True, TERRACOTTA, False, 8),
             ("Rank sensitivity indicates whether priority cells are robust to alternative hazard-led or exposure-led assumptions.", 14, False, DARK, False, 0),
         ],
+    )
+    _notes(
+        slide,
+        "The KHI sensitivity slide tests whether the priority ranking is fragile. "
+        "Allentown remains the top base-scheme municipality because it combines many exposed facilities with meaningful karst density. "
+        "Hanover and Lower Macungie move depending on how much weight is placed on hazard density. "
+        "This is why rank stability is part of the final interpretation, not an afterthought.",
+    )
+
+
+def _slide_gis_evidence(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "GIS Evidence", page)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "arcgis-clip-workflow.png", 0.62, 1.12, 6.35, 3.15)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "county-exposure-layout.png", 7.22, 1.12, 2.45, 3.15)
+    _add_picture_or_placeholder(slide, DASHBOARD_ASSETS / "karst-density-layout.png", 9.88, 1.12, 2.45, 3.15)
+    add_multi_text(
+        slide,
+        0.72,
+        4.62,
+        11.75,
+        1.45,
+        [
+            ("Production record", 20, True, TERRACOTTA, False, 8),
+            ("The ArcGIS Pro clip screenshot and exported layouts document the preprocessing chain used before final Python/Vercel packaging. They are included as evidence artifacts rather than hidden intermediate work.", 14, False, DARK, False, 0),
+        ],
+    )
+    _notes(
+        slide,
+        "This slide is included because the project also has a GIS production history. "
+        "The screenshot shows the clip workflow in ArcGIS Pro, while the two layouts show the mapped hazard proxy and density communication layers. "
+        "These artifacts help a professor see that the project was not only a web dashboard. "
+        "They also connect the Python outputs to the GIS workflow used during development.",
+    )
+
+
+def _slide_limitations(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Limitations & Uncertainty", page)
+    items = [
+        ("Hazard proxy", "Mapped karst is evidence of susceptibility, not a timed failure probability."),
+        ("Geometry assignment", "Polygon assignment is real, but boundary/source coordinate error still exists."),
+        ("Facilities", "Public inventories require facility-by-facility QA before operational use."),
+        ("Vulnerability", "No fragility curves, downtime, service areas, or repair-cost model are included."),
+        ("Temporal risk", "No rainfall, groundwater, construction, or climate trigger probability is modeled."),
+    ]
+    for idx, (title, body) in enumerate(items):
+        x = 0.8 + (idx % 3) * 4.15
+        y = 1.25 + (idx // 3) * 2.25
+        add_rect(slide, x, y, 3.55, 1.55, SAND, TERRACOTTA)
+        add_text(slide, x + 0.22, y + 0.22, 3.1, 0.3, title, 15, True, TERRACOTTA)
+        add_text(slide, x + 0.22, y + 0.62, 3.05, 0.7, body, 12, False, DARK)
+    add_text(slide, 0.9, 6.35, 11.3, 0.35, "Interpretation rule: results identify screening priorities, not evidence of current facility damage.", 15, True, DARK, "center")
+    _notes(
+        slide,
+        "This is the slide that protects the project from overclaiming. "
+        "The model is strong as a transparent screen, but it does not contain site geotechnical investigation or temporal probability. "
+        "It also does not estimate structural damage or service downtime. "
+        "Those limitations become the future-work roadmap rather than a weakness hidden from the audience.",
+    )
+
+
+def _slide_recommendations(prs: Presentation, blank: Any, page: int) -> None:
+    slide = _content_slide(prs, blank, "Recommendations & Conclusion", page)
+    columns = [
+        ("Immediate QA", "Verify top hospital and high-risk facility coordinates against source records, aerial imagery, and local asset owners."),
+        ("Engineering upgrade", "Add carbonate geology, depth-to-bedrock, drainage, slope, soils, and stormwater covariates."),
+        ("CATModel upgrade", "Replace relative loss with fragility, downtime, service disruption, and dollar-denominated repair/loss estimates."),
+    ]
+    for idx, (title, body) in enumerate(columns):
+        x = 0.75 + idx * 4.18
+        add_rect(slide, x, 1.25, 3.55, 3.25, SAND, TERRACOTTA)
+        add_text(slide, x + 0.25, 1.65, 3.05, 0.4, title, 17, True, TERRACOTTA, "center")
+        add_text(slide, x + 0.32, 2.25, 2.9, 1.55, body, 13, False, DARK, "center", "middle")
+    add_text(
+        slide,
+        1.0,
+        5.2,
+        11.3,
+        0.8,
+        "Bottom line: the strongest screening priorities are where dense mapped karst, essential facilities, and rank-stable KHI results converge.",
+        23,
+        True,
+        TERRACOTTA,
+        "center",
+        "middle",
+    )
+    _notes(
+        slide,
+        "My closing recommendation is to treat the model as a triage tool. "
+        "The first practical step is QA on the highest-ranked facilities and municipalities. "
+        "The next engineering step is to add geotechnical and hydrologic covariates. "
+        "The next CATModel step is to turn exposure into damage, downtime, and loss.",
     )
 
 
@@ -364,7 +639,9 @@ def _county_summary_text(summary: pd.DataFrame) -> str:
         return "Run the pipeline to populate county exposure summaries."
     parts = []
     for row in summary.itertuples(index=False):
-        parts.append(f"{row.county}: {int(row.exposed_within_500m)} of {int(row.total)} within 500 m")
+        parts.append(
+            f"{row.county}: {int(row.exposed_within_1000m)} of {int(row.total)} within 1 km"
+        )
     return "\n".join(parts)
 
 
@@ -397,3 +674,9 @@ def _anchor(value: str) -> MSO_ANCHOR:
 def _rgb(hex_color: str) -> RGBColor:
     color = hex_color.lstrip("#")
     return RGBColor(int(color[0:2], 16), int(color[2:4], 16), int(color[4:6], 16))
+
+
+def _notes(slide: Any, text: str) -> None:
+    notes = slide.notes_slide.notes_text_frame
+    notes.clear()
+    notes.text = text
