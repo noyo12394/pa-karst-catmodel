@@ -1,89 +1,98 @@
 # PA Karst Hazard CATModel
 
-One-line description: a reproducible Python CATModel pipeline that estimates essential-facility exposure to mapped karst features in Lehigh, Berks, Bucks, Montgomery, and Chester Counties, Pennsylvania.
+A reproducible Python and Vercel project that screens essential-facility exposure to mapped karst susceptibility in Lehigh, Berks, Bucks, Montgomery, and Chester Counties, Pennsylvania.
+
+Live site: <https://pa-karst-catmodel.vercel.app>
 
 ## Quickstart
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/noyo12394/pa-karst-catmodel.git
 cd pa-karst-catmodel
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Place the PASDA/DCNR karst shapefile files in `data/raw/`, including `DCNR_PAKarst.dbf`, then run:
+Place the raw source files in `data/raw/`:
+
+- `DCNR_PAKarst/DCNR_PAKarst.dbf`
+- `DOH_Hospitals202511.zip`
+- `STRUCT_Pennsylvania_State_Shape/Shape/Struct_Point.shp`
+- `STRUCT_Pennsylvania_State_Shape/Shape/Struct_Point.dbf`
+- `PaCounty2026_01.zip`
+- `PaMunicipalities2026_01.zip`
+
+Then run:
 
 ```bash
 python scripts/run_all.py
 ```
 
-The pipeline writes processed CSVs to `data/processed/`, result tables to `outputs/tables/`, figures to `outputs/figures/`, and the final slide deck to `outputs/presentation/PA_Karst_Final_Presentation.pptx`.
+The pipeline writes processed CSVs to `data/processed/`, result tables to `outputs/tables/`, figures to `outputs/figures/`, and the final deck to `outputs/presentation/PA_Karst_Final_Presentation.pptx`.
 
-## Dashboard and Vercel
+## Dashboard
 
-This repository includes a static project hub in `dashboard/` for web presentation of the final PDF/PPT results, literature context, methodology, interactive exposure/KHI views, scenario testing, and project outputs. Build it locally with:
+The static project hub in `dashboard/` contains the final project narrative, literature context, real-data inventory, exposure lab, KHI lab, scenario controls, cinematic animation, USGS photo gallery, GIS evidence, and download links. Build it locally with:
 
 ```bash
 npm run build
 ```
 
-The Vercel deployment uses `vercel.json` to run the dashboard build and serve the generated `dist/` directory. Deploy directly to production with:
-
-```bash
-vercel --prod --yes
-```
-
-The dashboard also includes GIS evidence assets in `dashboard/assets/` and source map-layout PDFs in `project-assets/gis/`, including ArcGIS Pro clipping workflow screenshots and exported map layouts used in the final presentation narrative.
+Vercel serves the generated `dist/` directory using `vercel.json`.
 
 ## Directory Structure
 
 ```text
 pa-karst-catmodel/
 ├── data/
-│   ├── raw/          # input shapefiles, gitignored
-│   └── processed/    # cleaned intermediate CSVs, gitignored
+│   ├── raw/              # input GIS files, gitignored
+│   └── processed/        # cleaned intermediate CSVs, gitignored
 ├── outputs/
-│   ├── figures/      # PNG charts and maps
-│   ├── tables/       # CSV result tables
-│   └── presentation/ # final PPTX
-├── scripts/          # runnable pipeline steps
-├── dashboard/        # static web dashboard for Vercel
-├── src/              # model source code
-└── tests/            # pytest unit tests
+│   ├── figures/          # generated PNG charts and maps, gitignored
+│   ├── tables/           # generated CSV tables, gitignored
+│   └── presentation/     # generated PPTX, gitignored
+├── dashboard/            # static Vercel dashboard and downloadable copies
+├── docs/                 # final technical brief
+├── project-assets/gis/   # committed GIS evidence PDFs
+├── scripts/              # pipeline entry points
+├── src/                  # type-hinted model source code
+└── tests/                # pytest unit tests
 ```
 
 ## Methodology Summary
 
-This project reframes mapped karst as a susceptibility proxy rather than a deterministic sinkhole forecast. The final result set uses 30,623 mapped karst features from the PASDA/DCNR Pennsylvania Karst Inventory clipped to Lehigh, Berks, Bucks, Montgomery, and Chester Counties. Those features are summarized by county, feature type, and local density to show where mapped carbonate-related ground-failure susceptibility is spatially concentrated.
+The project treats mapped karst as a susceptibility proxy, not a deterministic sinkhole forecast. The DCNR/PASDA karst DBF contains 144,245 statewide records; 30,623 fall inside the five study-county polygons. Surface depressions dominate the study inventory, so the language stays deliberately conservative: the model screens where mapped karst evidence is dense, not where a failure will occur.
 
-Essential-facility exposure is calculated from 42 PA Department of Health hospital points and 1,675 USGS National Map essential-structure points. Each facility is scored by nearest mapped karst distance, buffer class, local karst density within 1 km, and facility criticality. The 100 m, 250 m, 500 m, and 1 km screening bands are used as planning-level proximity classes rather than direct damage states.
+Essential-facility exposure is computed from real public inventories: 42 PA Department of Health hospital points and 1,675 USGS structure points classified as schools, fire/EMS, police, or correctional facilities. Each facility receives nearest-karst distance, proximity class at 100 m, 250 m, 500 m, 1 km, local karst count within 1 km, and type criticality. The regenerated results identify 455 facilities within 1 km of mapped karst.
 
-The Karst Hazard Index (KHI) aggregates hazard, exposure, and criticality across 287 PennDOT municipality polygons. Three weighting schemes test whether rankings are stable when the model is hazard-led, exposure-led, or balanced. The result is a transparent CATModel-style screening tool that identifies where more detailed engineering or site-specific geotechnical review would be most valuable.
-
-For a concise final-result narrative, see [`docs/final-results-brief.md`](docs/final-results-brief.md).
+The Karst Hazard Index is computed over 287 PennDOT municipality polygons using `KHI = 100 * (wH*H + wE*E + wC*C)`. `H` is min-max normalized municipal karst density, `E` is min-max normalized exposed-facility count within 500 m, and `C` is min-max normalized criticality-weighted exposure. The Base, Hazard-led, Exposure-led, and Critical-facility schemes support sensitivity testing with Spearman rank correlations.
 
 ## Data Sources
 
-- PASDA/DCNR Pennsylvania Karst Features: https://www.pasda.psu.edu/
-- Pennsylvania Department of Health facility and public health context: https://www.health.pa.gov/
-- National Center for Education Statistics school data context: https://nces.ed.gov/
-- U.S. Census Bureau county population context: https://www.census.gov/
-- Pennsylvania Geological Survey karst references: https://www.dcnr.pa.gov/Geology/
+- PASDA / PA DCNR Pennsylvania Karst Features: <https://www.pasda.psu.edu/>
+- PA Department of Health hospital facility data: <https://www.health.pa.gov/>
+- USGS National Map structures data: <https://www.usgs.gov/programs/national-geospatial-program/national-map>
+- PennDOT / PA geospatial county and municipality boundaries via PASDA: <https://www.pasda.psu.edu/>
+- U.S. Census Bureau county population context: <https://www.census.gov/>
+- PA DCNR sinkhole and karst guidance: <https://www.pa.gov/agencies/dcnr/conservation/geology/geologic-hazards/sinkholes>
 
 ## Limitations
 
-- The hazard layer is treated as a binary susceptibility proxy; it is not a time-dependent sinkhole probability model.
-- Facility coordinates and classifications depend on the completeness of public DOH and USGS source inventories.
-- The model does not include fragility curves, structural vulnerability, repair duration, redundancy, or service-area disruption.
-- Exposure buffers are screening distances, not geotechnical proof of sinkhole initiation, propagation, or facility damage.
-- Loss proxy values are relative scenario indicators, not dollar-denominated loss estimates.
+- Mapped karst is a binary susceptibility proxy, not a temporal sinkhole probability.
+- Public facility coordinates and source classifications still need facility-by-facility QA before operational use.
+- The model does not include fragility curves, foundation type, repair costs, service-area disruption, redundancy, or downtime.
+- Exposure buffers are screening distances, not direct evidence of distress or damage at a facility.
+- No rainfall, groundwater, construction, or climate trigger probability is modeled.
 
 ## Citations
 
-- IPCC. 2014. Climate Change 2014: Impacts, Adaptation, and Vulnerability. Cambridge University Press.
-- Wood, N., Jones, J., Peters, J., and Richards, K. U.S. Geological Survey risk and vulnerability framing for natural hazards.
-- Reese, S. O., and Kochanov, W. E. Pennsylvania Geological Survey karst and sinkhole hazard references.
+- IPCC. 2014. *Climate Change 2014: Impacts, Adaptation, and Vulnerability*. Cambridge University Press.
+- Wood, N. J., Doctor, D. H., Alder, J. R., and Jones, J. M. 2023. "Current and future sinkhole susceptibility in karst and pseudokarst areas of the conterminous United States." *Frontiers in Earth Science*. <https://doi.org/10.3389/feart.2023.1207689>
+- Reese, S. O., and Kochanov, W. E. Pennsylvania Geological Survey sinkhole and karst hazard references.
+- Maleki, M. et al. 2023. "GIS-based sinkhole susceptibility mapping using the best worst method." *Spatial Information Research*. <https://doi.org/10.1007/s41324-023-00520-6>
+- Qiu, X., Wu, S.-S., and Chen, Y. 2020. "Sinkhole susceptibility assessment based on morphological, imagery, and contextual attributes derived from GIS and imagery data." *Journal of Cave and Karst Studies*. <https://doi.org/10.4311/2018ES0118>
+- Taheri, K. et al. 2015. "Sinkhole susceptibility mapping using the analytical hierarchy process and magnitude-frequency relationships." *Geomorphology*. <https://doi.org/10.1016/j.geomorph.2015.01.005>
 
 ## License
 

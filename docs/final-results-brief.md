@@ -2,104 +2,143 @@
 
 ## Project Position
 
-This project treats mapped karst features as a regional susceptibility proxy and asks where that susceptibility intersects essential facilities in southeastern Pennsylvania. The model does not claim to predict the timing or probability of a sinkhole at a parcel. It instead provides a transparent screening workflow that supports prioritization: which counties, municipalities, and essential facilities deserve more detailed geotechnical review, asset verification, or emergency-planning attention.
+This project treats mapped karst features as a regional susceptibility proxy and asks where that susceptibility intersects essential facilities in southeastern Pennsylvania. It does not predict the timing or probability of a sinkhole at a parcel. It provides a transparent screening workflow for prioritization: which counties, municipalities, and essential facilities deserve more detailed geotechnical review, asset verification, or emergency-planning attention.
 
-The study area covers Lehigh, Berks, Bucks, Montgomery, and Chester Counties. These counties combine mapped carbonate-karst terrain, dense public infrastructure, and high population exposure. The final workflow links mapped karst, public facility inventories, municipality boundaries, and a Karst Hazard Index (KHI) sensitivity test into one reproducible project package.
+The final workflow links mapped karst, public facility inventories, county and municipality boundaries, exposure buffers, and a Karst Hazard Index sensitivity test into one reproducible package. The project is intentionally lightweight: no GeoPandas dependency, raw DBF parsing, pure-Python shapefile readers, and deterministic fallback logic when optional facility files are missing.
 
 ## Final Data Inventory
 
-| Layer | Source | Geometry | Statewide Records | Study-Area Records | Role |
-| --- | --- | --- | ---: | ---: | --- |
-| Pennsylvania Karst Inventory | PA DCNR / PASDA | Point | 144,245 | 30,623 | Hazard / susceptibility proxy |
-| Hospitals | PA Department of Health, 2025-11 | Point | 226 | 42 | Essential-facility exposure |
-| Essential Structures | USGS National Map | Point | 24,217 | 1,675 | Essential-facility exposure |
-| County boundaries | PennDOT, 2026-01 | Polygon | 67 | 5 | Study-area clipping and county summary |
-| Municipality boundaries | PennDOT, 2026-01 | Polygon | 2,567 | 287 | KHI aggregation unit |
+| File / layer | Purpose | Status | Gap / note |
+| --- | --- | --- | --- |
+| `DCNR_PAKarst.dbf` | Statewide mapped karst points | current / real | 144,245 records parsed directly from DBF |
+| `PaCounty2026_01.zip` | County polygons and area | current / real | Web Mercator polygons converted to lon/lat |
+| `PaMunicipalities2026_01.zip` | Municipality polygons | current / real | 287 study-area polygons used for KHI |
+| `DOH_Hospitals202511.zip` | Hospital points | current / real | 42 study-area hospital records |
+| `Struct_Point.shp/dbf` | USGS structures | current / real | 1,675 school, fire/EMS, police, and correctional records |
+| Synthetic facility generator | Backup facility inventory | fallback only | Used only if real facility files are absent |
+| GIS layout PDFs / screenshot | Workflow evidence | current / evidence | Used in dashboard and presentation |
+| Dashboard / PPTX / brief | Communication artifacts | current | Synced to regenerated tables |
 
-The dashboard uses the reconciled final-deck facility count: 42 hospitals plus 1,675 USGS essential structures, for 1,717 total facilities. Earlier draft artifacts contained a minor alternate essential-structure count, but the final PDF/PPT county totals reconcile to 1,717 facilities.
+## Top-Line Results
 
-## Hazard Pattern
+| Metric | Value |
+| --- | ---: |
+| Statewide mapped karst records | 144,245 |
+| Study-area mapped karst records | 30,623 |
+| Study counties | 5 |
+| Municipality polygons | 287 |
+| Total facilities | 1,717 |
+| Hospitals | 42 |
+| USGS structures | 1,675 |
+| Facilities within 500 m | 352 |
+| Facilities within 1 km | 455 |
 
-The mapped karst inventory is dominated by surface depressions, which represent about 94.0 percent of study-area features. Sinkholes contribute about 2.8 percent, surface mines about 3.1 percent, and caves less than 0.1 percent. This composition is why the project uses "mapped karst susceptibility" language rather than treating every point as an observed damaging sinkhole.
+The study-area karst inventory is dominated by surface depressions: 28,798 of 30,623 features. The remaining features are 951 surface mines, 871 sinkholes, and 3 caves. This is why the model uses susceptibility language rather than treating every point as an observed damaging sinkhole.
 
-County-level hazard density is highly uneven. Lehigh has the highest mapped-feature density at 11.24 features/km2, followed by Berks at 7.27 features/km2. Chester drops to 1.29 features/km2, while Bucks and Montgomery are below 0.40 features/km2. This spatial imbalance is the backbone of the county exposure story: the highest concern is not simply where the most people live, but where dense essential facilities overlap dense mapped karst.
+County-level density is highly uneven. Lehigh has the highest mapped-feature density at 11.24 features/km², followed by Berks at 7.27 features/km². Chester is 1.30 features/km², Bucks is 0.62, and Montgomery is 0.51. This spatial imbalance drives the screening results: the greatest concern is not simply where the most people live, but where dense essential facilities overlap mapped karst evidence.
 
 ## Exposure Results
 
-The final exposure screen identifies 380 essential facilities within 1 km of a mapped karst feature. The proximity bands are interpreted as planning screens:
+The regenerated exposure screen identifies 455 essential facilities within 1 km of mapped karst. The proximity bands are interpreted as planning screens:
 
-| Buffer band | Hospital | Fire/EMS | Police | School | Total |
+| Buffer band | Fire/EMS | Hospital | Police | School | Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 0-100 m | 2 | 13 | 1 | 56 | 72 |
-| 100-250 m | 2 | 23 | 7 | 62 | 94 |
-| 250-500 m | 5 | 36 | 12 | 54 | 107 |
-| 500-1000 m | 2 | 34 | 23 | 48 | 107 |
-| Cumulative 1 km | 11 | 106 | 43 | 220 | 380 |
+| 0-100 m | 15 | 2 | 5 | 72 | 94 |
+| 100-250 m | 30 | 3 | 11 | 84 | 128 |
+| 250-500 m | 42 | 5 | 17 | 66 | 130 |
+| 500-1000 m | 34 | 2 | 18 | 49 | 103 |
+| Outside 1 km | 314 | 30 | 153 | 765 | 1,262 |
 
-Berks and Lehigh dominate the exposure totals. Berks has 158 exposed facilities within 1 km, and Lehigh has 116. Together they account for 274 of 380 exposed facilities, or about 72 percent of the 1 km exposure set. Chester has 63, Montgomery has 40, and Bucks has only 3.
+County summaries show the concentration clearly:
+
+| County | Facilities | Within 500 m | Within 1 km | % within 1 km |
+| --- | ---: | ---: | ---: | ---: |
+| Lehigh | 215 | 159 | 176 | 81.9% |
+| Berks | 301 | 114 | 158 | 52.5% |
+| Chester | 331 | 47 | 63 | 19.0% |
+| Montgomery | 499 | 23 | 47 | 9.4% |
+| Bucks | 371 | 9 | 11 | 3.0% |
+
+Lehigh and Berks account for 334 of the 455 facilities within 1 km. Lehigh is especially important because its total facility count is smaller than Montgomery or Bucks, but its exposure share is far higher.
 
 ## Critical Hospital Findings
 
-The most exposed hospital points are concentrated in Lehigh and Berks, with additional flagged facilities in Chester and Montgomery. The nearest-karst hospital list begins:
+Twelve hospitals fall within 1 km of a mapped karst feature. The nearest hospital points are:
 
-1. Lehigh Valley Hospital, Lehigh County, Allentown: 57 m
-2. Tower Behavioral Health, Berks County, Reading: 72 m
-3. Surgical Institute of Reading, Berks County, Wyomissing: 111 m
-4. Good Shepherd Specialty Hospital, Lehigh County, Bethlehem: 130 m
-5. Wernersville State Hospital, Berks County, Wernersville: 273 m
+| Rank | Hospital | County | City | Nearest karst |
+| ---: | --- | --- | --- | ---: |
+| 1 | Lehigh Valley Hospital | Lehigh | Allentown | 57 m |
+| 2 | Tower Behavioral Health | Berks | Reading | 72 m |
+| 3 | Surgical Institute of Reading | Berks | Wyomissing | 111 m |
+| 4 | Good Shepherd Specialty Hospital | Lehigh | Bethlehem | 130 m |
+| 5 | St. Luke's Hospital Bethlehem | Lehigh | Bethlehem | 181 m |
+| 6 | Wernersville State Hospital | Berks | Wernersville | 273 m |
+| 7 | Saint John Vianney Hospital | Chester | Downingtown | 303 m |
+| 8 | Penn State Health St. Joseph | Berks | Reading | 333 m |
+| 9 | Good Shepherd Rehabilitation Hospital | Lehigh | Allentown | 434 m |
+| 10 | Veterans Affairs Medical Center Coatesville | Chester | Coatesville | 442 m |
 
-These distances should be read as screening evidence, not evidence of structural distress. The appropriate follow-up would be source-data QA, site geotechnical record review, drainage and stormwater checks, and coordination with facility owners where appropriate.
+These distances are screening evidence only. The appropriate follow-up is source-coordinate QA, site geotechnical record review, stormwater and drainage checks, and facility-owner coordination where appropriate.
 
-## KHI Method
+## KHI Method and Sensitivity
 
-The Karst Hazard Index uses the IPCC-style risk framing that risk emerges from the interaction of hazard, exposure, and vulnerability or criticality. The project operationalizes that framing as:
+The Karst Hazard Index follows the risk framing that risk emerges from the interaction of hazard, exposure, and vulnerability or criticality:
 
 ```text
-KHI = 100 x (wH H + wE E + wC C)
+KHI = 100 * (wH * H + wE * E + wC * C)
 ```
 
-where `H` is normalized mapped-karst count, `E` is normalized exposed-facility count, and `C` is normalized criticality-weighted exposure. Three schemes are used:
+`H` is min-max normalized municipal karst density, `E` is min-max normalized exposed-facility count within 500 m, and `C` is min-max normalized criticality-weighted exposure. Four schemes were tested:
 
-| Scheme | Hazard weight | Exposure weight | Criticality weight |
+| Scheme | Hazard | Exposure | Criticality |
 | --- | ---: | ---: | ---: |
 | Base | 0.40 | 0.40 | 0.20 |
 | Hazard-led | 0.60 | 0.25 | 0.15 |
 | Exposure-led | 0.25 | 0.60 | 0.15 |
+| Critical-facility | 0.30 | 0.35 | 0.35 |
 
-## Highest-Priority Municipalities
-
-The base KHI ranking identifies Allentown as the strongest combined priority because it has both high exposed-facility count and meaningful mapped-karst presence. Hanover Township and Maxatawny Township follow, but for different reasons: Hanover is sensitive to hazard weighting, while Maxatawny has very high mapped-karst count.
+Top Base KHI municipalities:
 
 | Base rank | Municipality | County | Karst count | Exposed facilities | Base KHI |
 | ---: | --- | --- | ---: | ---: | ---: |
-| 1 | Allentown | Lehigh | 349 | 45 | 64.4 |
-| 2 | Hanover | Lehigh | 787 | 5 | 48.0 |
-| 3 | Maxatawny | Berks | 3,407 | 6 | 38.3 |
-| 4 | Lyons | Berks | 58 | 2 | 36.6 |
-| 5 | Whitehall | Lehigh | 346 | 18 | 34.8 |
+| 1 | Allentown | Lehigh | 349 | 51 | 64.36 |
+| 2 | Lower Macungie | Lehigh | 2,016 | 10 | 46.41 |
+| 3 | Hanover | Lehigh | 787 | 5 | 46.32 |
+| 4 | South Whitehall | Lehigh | 1,248 | 16 | 38.84 |
+| 5 | Upper Macungie | Lehigh | 2,990 | 7 | 37.54 |
+| 6 | Maxatawny | Berks | 3,407 | 6 | 36.52 |
 
-The sensitivity test evaluates 900 weight combinations across the hazard-exposure-criticality simplex. Base and hazard-led ranks are strongly correlated with Spearman rho = 0.942, and base and exposure-led ranks remain strongly correlated with rho = 0.906. Allentown remains ranked first across roughly 80 percent of valid weight space, making it the most stable top-priority municipality in the analysis.
+Spearman rank correlations over the top 50 Base municipalities are strong but not identical:
 
-## Interpretation
+| Scheme pair | Spearman rho |
+| --- | ---: |
+| Base vs Hazard-led | 0.957 |
+| Base vs Exposure-led | 0.944 |
+| Base vs Critical-facility | 0.969 |
+| Hazard-led vs Exposure-led | 0.832 |
 
-The main technical finding is spatial concentration. Karst susceptibility is not evenly distributed across the five counties, and neither is essential-facility exposure. Berks and Lehigh carry most of the modeled exposure burden, while Allentown, Hanover, and Maxatawny emerge as high-priority KHI municipalities for different combinations of hazard count, exposed assets, and criticality.
+The interpretation is that the highest priorities are fairly stable, but the reason for high priority changes. Allentown is exposure- and criticality-driven. Hanover and Lower Macungie are more sensitive to hazard density. That distinction is useful for explaining what kind of follow-up each place needs.
 
-The model is strongest as a defensible screening tool. It is transparent, reproducible, and sensitive to weight assumptions, but it does not contain a subsurface failure model, event frequency, fragility curve, downtime estimate, or service-area disruption model. Those additions would be required before moving from classroom CATModel screening to operational risk management.
+## What This Means
+
+The main technical finding is spatial concentration. Lehigh and Berks carry most of the modeled exposure burden, while Allentown, Lower Macungie, Hanover, South Whitehall, Upper Macungie, and Maxatawny emerge as high-priority municipal screening targets under the Base scheme. These results do not prove damage, but they do identify where deeper review is easiest to justify.
+
+For screening and prioritization, the recommended next step is a short-list workflow: verify the highest-ranked hospital and facility coordinates, review known local geotechnical reports where available, check stormwater and drainage conditions, and decide whether site-level investigation is warranted. The model is strongest as a defensible triage tool. It is not a replacement for geotechnical engineering, but it gives that engineering work a more transparent starting point.
 
 ## Recommended Next Work
 
 1. Verify the nearest-karst hospital list against original facility coordinates and local geotechnical records.
 2. Add carbonate geology, depth-to-bedrock, soil, slope, hydrology, stormwater, and land-use covariates.
-3. Replace buffer-only damage logic with facility-type fragility curves or expert-elicited damage states.
+3. Replace buffer-only loss logic with facility-type fragility curves or expert-elicited damage states.
 4. Add service-area and redundancy metrics for hospitals, EMS, schools, and police.
-5. Convert the loss proxy into a dollar and downtime model using replacement value, occupancy, repair duration, and functionality curves.
-6. Extend the sensitivity analysis to probabilistic uncertainty rather than deterministic weight sweeps alone.
+5. Convert the relative loss proxy into a dollar and downtime model using replacement value, repair duration, and functionality curves.
+6. Extend sensitivity analysis from deterministic weight sweeps to probabilistic uncertainty.
 
 ## Core Citations
 
-- IPCC. 2014. Climate Change 2014: Impacts, Adaptation, and Vulnerability.
-- Wood, N., Jones, J., Peters, J., and Richards, K. U.S. Geological Survey risk and vulnerability framing for natural hazards.
+- IPCC. 2014. *Climate Change 2014: Impacts, Adaptation, and Vulnerability*.
+- Wood, N. J., Doctor, D. H., Alder, J. R., and Jones, J. M. 2023. "Current and future sinkhole susceptibility in karst and pseudokarst areas of the conterminous United States." *Frontiers in Earth Science*. <https://doi.org/10.3389/feart.2023.1207689>
 - Reese, S. O., and Kochanov, W. E. Pennsylvania Geological Survey karst and sinkhole hazard references.
-- PA DCNR / PASDA. Pennsylvania Karst Inventory.
-- PA Department of Health. Hospital facility inventory.
-- USGS National Map. Essential structures.
+- Maleki, M. et al. 2023. "GIS-based sinkhole susceptibility mapping using the best worst method." *Spatial Information Research*. <https://doi.org/10.1007/s41324-023-00520-6>
+- Qiu, X., Wu, S.-S., and Chen, Y. 2020. "Sinkhole susceptibility assessment based on morphological, imagery, and contextual attributes derived from GIS and imagery data." *Journal of Cave and Karst Studies*. <https://doi.org/10.4311/2018ES0118>
+- Taheri, K. et al. 2015. "Sinkhole susceptibility mapping using the analytical hierarchy process and magnitude-frequency relationships." *Geomorphology*. <https://doi.org/10.1016/j.geomorph.2015.01.005>
