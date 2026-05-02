@@ -1,0 +1,6 @@
+county,total,exposed_within_500m,exposed_within_1000m,weighted_exposure,pct_within_500m,pct_within_1000m
+Berks,301,114,158,76.825,37.9,52.5
+Bucks,371,9,11,32.825,2.4,3.0
+Chester,331,47,63,44.58,14.2,19.0
+Lehigh,215,159,176,89.895,74.0,81.9
+Montgomery,499,23,47,50.365,4.6,9.4

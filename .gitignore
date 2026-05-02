@@ -14,12 +14,16 @@ data/processed/*
 !data/processed/.gitkeep
 outputs/figures/*
 !outputs/figures/.gitkeep
+!outputs/figures/*.png
 outputs/tables/*
 !outputs/tables/.gitkeep
+!outputs/tables/*.csv
 outputs/presentation/*
 !outputs/presentation/.gitkeep
+!outputs/presentation/*.pptx
 *.pptx
 *.pdf
+!outputs/presentation/*.pptx
 !dashboard/downloads/*.pptx
 !dashboard/downloads/*.csv
 !dashboard/downloads/*.md
